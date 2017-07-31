@@ -1,0 +1,6 @@
+[submodule "amiro_robot"]
+	path = amiro_robot
+	url = https://github.com/tik0/amiro_robot.git
+[submodule "rviz_textured_quads"]
+	path = rviz_textured_quads
+	url = https://github.com/lucasw/rviz_textured_quads.git

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="rviz" default="true" />
+
+  <group if="$(arg rviz)">
+    <include file="$(find demo)/launch/map_visualization.xml"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/demo.rviz" respawn="true" />
+  </group>
+</launch>

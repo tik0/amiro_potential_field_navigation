@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+ <launch>
+   <!-- tf stuff for the rviz image visualization belongs here -->
+</launch>
