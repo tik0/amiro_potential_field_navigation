@@ -4,3 +4,6 @@
 [submodule "rviz_textured_quads"]
 	path = rviz_textured_quads
 	url = https://github.com/lucasw/rviz_textured_quads.git
+[submodule "grid_map"]
+	path = grid_map
+	url = https://github.com/ethz-asl/grid_map.git

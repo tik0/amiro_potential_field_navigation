@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   amiro_description
   amiro_gazebo
   amiro_msgs
-  grid_map
+  grid_map_core
   nav_msgs
   roscpp
   rospy
