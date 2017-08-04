@@ -3,8 +3,15 @@
 
   <arg name="rviz" default="true" />
 
-  <group if="$(arg rviz)">
-    <include file="$(find demo)/launch/map_visualization.xml"/>
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find demo)/demo.rviz" respawn="true" />
-  </group>
+  <!--<group if="$(arg rviz)">-->
+    <!--<include file="$(find rviz_textured_quads)/launch/map_visualization.xml"/>-->
+    <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find rviz_textured_quads)/demo.rviz" respawn="true" />-->
+  <!--</group>-->
+
+  <node name="rqt_topic" pkg="rqt_topic" type="rqt_topic"/>
+   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" respawn="true"/>
+
+  <node name="image_selecter_node" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME"/>
+  <node name="image_to_potentialfield_node" pkg="potential_field_navigation" type="image_to_potentialfield_node" output="screen" cwd="ROS_HOME"/>
+  <node name="potentialfield_to_gridmap_node" pkg="potential_field_navigation" type="potentialfield_to_gridmap_node" output="screen" cwd="ROS_HOME"/>
 </launch>

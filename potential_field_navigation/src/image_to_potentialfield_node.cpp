@@ -1,6 +1,6 @@
 // ============================================================================
 // Name        : image_to_potentialfield_node.cpp
-// Author      : Daniel Rudolph <drudolph@techfak.uni-bielefeld.de
+// Author      : Daniel Rudolph <drudolph@techfak.uni-bielefeld.de>
 // Description : Recieve a image and creates a potentialfield.
 // ============================================================================
 
@@ -40,7 +40,7 @@ cv::Mat toMat(cv::Mat potentialField) {
     for (int x = 0; x < potentialField.cols; x++) {
       cv::Vec3b vec;
       cv::Point point(potentialField.at<cv::Vec2f>(y, x)[0], potentialField.at<cv::Vec2f>(y, x)[1]);
-      double angle = atan2(point.y,point.x) / M_PI * 180;
+      double angle = atan2(point.y, point.x) / M_PI * 180;
       angle = fmod(angle + 360.0, 360.0);
       int h = angle / 60;
 //      int C = 255;
@@ -81,14 +81,15 @@ cv::Mat toMat(cv::Mat potentialField) {
           break;
       }
 //      out.at<cv::Vec3b>(y,x)[0] = angle * 0.708;
-      out.at<cv::Vec3b>(y,x) = vec;
+      out.at<cv::Vec3b>(y, x) = vec;
     }
   }
   return out;
 }
 
-void process() {
-  cv::Mat image = cv::imread("patter/a.png", CV_LOAD_IMAGE_GRAYSCALE);
+void process(const sensor_msgs::ImageConstPtr &msg) {
+  boost::posix_time::ptime before = boost::posix_time::microsec_clock::local_time();
+  cv::Mat image = cv_bridge::toCvShare(msg, msg->encoding)->image;
   cv::Mat potentialField(image.size(), CV_32FC2);
 
   vector<cv::Point> blackPixel;
@@ -101,11 +102,9 @@ void process() {
         whitePixel.emplace_back(cv::Point(y, x));
     }
   }
-  cout << "blackPixel size:" << blackPixel.size() << " whitePixel size:" << whitePixel.size() << endl;
-
 
 #pragma omp parallel for
-  for (int i = 0; i < whitePixel.size(); i++) {
+  for (int i = 0; i < (signed) whitePixel.size(); i++) {
     cv::Point wPoint = whitePixel[i];
     cv::Point potential;
     for (cv::Point bPoint : blackPixel) {
@@ -121,6 +120,8 @@ void process() {
   cv_bridge::CvImage cvImage;
   cvImage.encoding = sensor_msgs::image_encodings::TYPE_32FC2;
   cvImage.image = potentialField;
+  boost::posix_time::ptime after = boost::posix_time::microsec_clock::local_time();
+  ROS_INFO("[%s] process image to potentialfield in %i ms", programName.c_str(), (int) (after - before).total_milliseconds());
   imagePublisher.publish(cvImage.toImageMsg());
 }
 
@@ -132,16 +133,11 @@ int main(int argc, char *argv[]) {
   node.param<string>("image_listener_topic", rosListenerTopic, "/image");
   ROS_INFO("image_listener_topic: %s", rosListenerTopic.c_str());
   node.param<string>("potentialfield_publisher_topic", rosPublisherTopic, "/potentialfield");
-  ROS_INFO("potentialfield_publisher_topic: %s", rosPublisherTopic.c_str());
 
   image_transport::ImageTransport imageTransport(node);
+  image_transport::Subscriber sub = imageTransport.subscribe(rosListenerTopic, 1, process);
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
 
-
-  boost::posix_time::ptime before = boost::posix_time::microsec_clock::local_time();
-  process();
-  boost::posix_time::ptime after = boost::posix_time::microsec_clock::local_time();
-  cout << "time: " << (after - before).total_milliseconds() << "ms" << endl;
 
   ros::spin();
   return 0;
