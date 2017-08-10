@@ -9,7 +9,7 @@
   <!--</group>-->
 
   <node name="rqt_topic" pkg="rqt_topic" type="rqt_topic"/>
-   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" respawn="true"/>
+   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz"/>
 
   <node name="image_selecter_node" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME"/>
   <node name="image_to_potentialfield_node" pkg="potential_field_navigation" type="image_to_potentialfield_node" output="screen" cwd="ROS_HOME"/>

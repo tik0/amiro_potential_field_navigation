@@ -33,60 +33,6 @@ static image_transport::Publisher imagePublisher;
 // program name
 const string programName = "image_to_potentialfield_node";
 
-cv::Mat toMat(cv::Mat potentialField) {
-  // point to hsv
-  cv::Mat out(potentialField.size(), CV_8UC3);
-  for (int y = 0; y < potentialField.rows; y++) {
-    for (int x = 0; x < potentialField.cols; x++) {
-      cv::Vec3b vec;
-      cv::Point point(potentialField.at<cv::Vec2f>(y, x)[0], potentialField.at<cv::Vec2f>(y, x)[1]);
-      double angle = atan2(point.y, point.x) / M_PI * 180;
-      angle = fmod(angle + 360.0, 360.0);
-      int h = angle / 60;
-//      int C = 255;
-      double C = sqrt(point.x * point.x + point.y * point.y) * 0.31;
-//      cout << C << endl;
-      int X = C * (1 - abs(h % 2 - 1));
-//      cout << h << "\t" << X << "\t" << angle << endl;
-      switch (h) {
-        case 0:
-          vec[2] = C;
-          vec[1] = X;
-          vec[0] = 0;
-          break;
-        case 1:
-          vec[2] = X;
-          vec[1] = C;
-          vec[0] = 0;
-          break;
-        case 2:
-          vec[2] = 0;
-          vec[1] = C;
-          vec[0] = X;
-          break;
-        case 3:
-          vec[2] = 0;
-          vec[1] = X;
-          vec[0] = C;
-          break;
-        case 4:
-          vec[0] = X;
-          vec[1] = 0;
-          vec[2] = C;
-          break;
-        case 5:
-          vec[0] = C;
-          vec[1] = 0;
-          vec[2] = X;
-          break;
-      }
-//      out.at<cv::Vec3b>(y,x)[0] = angle * 0.708;
-      out.at<cv::Vec3b>(y, x) = vec;
-    }
-  }
-  return out;
-}
-
 void process(const sensor_msgs::ImageConstPtr &msg) {
   boost::posix_time::ptime before = boost::posix_time::microsec_clock::local_time();
   cv::Mat image = cv_bridge::toCvShare(msg, msg->encoding)->image;
@@ -131,12 +77,13 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, programName);
   ros::NodeHandle node("~");
   node.param<string>("image_listener_topic", rosListenerTopic, "/image");
-  ROS_INFO("image_listener_topic: %s", rosListenerTopic.c_str());
-  node.param<string>("potentialfield_publisher_topic", rosPublisherTopic, "/potentialfield");
+  node.param<string>("potentialfield_publisher_topic", rosPublisherTopic, "/image/potentialfield");
+  ROS_INFO("[%s] image_listener_topic: %s", programName.c_str(), rosListenerTopic.c_str());
+  ROS_INFO("[%s] potentialfield_publisher_topic: %s", programName.c_str(), rosPublisherTopic.c_str());
 
   image_transport::ImageTransport imageTransport(node);
   image_transport::Subscriber sub = imageTransport.subscribe(rosListenerTopic, 1, process);
-  imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
+  imagePublisher = imageTransport.advertise(rosPublisherTopic, 1, true);
 
 
   ros::spin();

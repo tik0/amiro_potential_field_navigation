@@ -39,7 +39,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   include/
 )
-
+#image_to_potentialfield_node
 add_executable(image_to_potentialfield_node
   src/image_to_potentialfield_node.cpp)
 
@@ -47,6 +47,7 @@ target_link_libraries(image_to_potentialfield_node
   ${catkin_LIBRARIES}
   )
 
+#potentialfield_to_gridmap_node
 add_executable(potentialfield_to_gridmap_node
   src/potentialfield_to_gridmap_node.cpp)
 
@@ -54,6 +55,7 @@ target_link_libraries(potentialfield_to_gridmap_node
   ${catkin_LIBRARIES}
   )
 
+#image_selecter_node
 add_executable(image_selecter_node
   src/image_selecter_node.cpp)
 
@@ -62,6 +64,21 @@ target_link_libraries(image_selecter_node
   Qt5::Widgets
   )
 
+#amiro_odom_to_potentialfield_node
+add_executable(amiro_odom_to_potentialfield_node
+  src/amiro_odom_to_potentialfield_node.cpp)
+
+target_link_libraries(amiro_odom_to_potentialfield_node
+  ${catkin_LIBRARIES}
+  )
+
+#potentialfield_merger_node
+add_executable(potentialfield_merger_node
+  src/potentialfield_merger_node.cpp)
+
+target_link_libraries(potentialfield_merger_node
+  ${catkin_LIBRARIES}
+  )
 
 file(COPY "patter" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 

@@ -30,11 +30,10 @@
 
 using namespace std;
 
-// Ros Topics
-string rosPublisherTopic;
 
 // ros::Publisher rosPublisher;
 static image_transport::Publisher imagePublisher;
+static image_transport::Publisher imageRGBAPublisher;
 
 // program name
 const string programName = "image_selecter_node";
@@ -42,11 +41,13 @@ const string programName = "image_selecter_node";
 cv::Mat cv_image;
 QImage qt_image;
 
+bool imageSelected = false;
+
 GUI::GUI(QWidget *parent) : QWidget(parent) {
 
   QLabel *image_label = new QLabel(this);
   image_label->setGeometry(200, 0, 100, 100);
-  image_label->setText(QString::fromStdString("image_label"));
+  image_label->setText(QString::fromStdString("image label"));
 
   QPushButton *image_selecter = new QPushButton("select image", this);
   image_selecter->setGeometry(0, 0, button_width, button_height);
@@ -77,13 +78,28 @@ void GUI::selectImage() {
   this->setMinimumSize(qt_image.width(), qt_image.height() + button_height);
   image_label->setGeometry(0, button_height, qt_image.width(), qt_image.height() + button_height);
   image_label->show();
+  imageSelected = true;
 }
 
 void GUI::publishImage() {
+  if (!imageSelected) {
+    ROS_WARN("[%s] Please seletect an image first.", programName.c_str());
+    return;
+  }
   cv_bridge::CvImage cvImage;
-  cvImage.encoding = sensor_msgs::image_encodings::TYPE_8UC1;
+  cvImage.encoding = sensor_msgs::image_encodings::MONO8;
   cvImage.image = cv_image;
   imagePublisher.publish(cvImage.toImageMsg());
+
+  //TODO
+  // Publish image aswell as RGB for visualization
+  cv::Mat rgbaImage;
+  cv::cvtColor(cv_image,rgbaImage, CV_GRAY2RGBA);
+  cv_bridge::CvImage cvImageRgba;
+//  cvImageRgba.encoding = sensor_msgs::image_encodings::TYPE_8UC4;
+  cvImageRgba.encoding = sensor_msgs::image_encodings::BGRA8;
+  cvImageRgba.image = rgbaImage;
+  imageRGBAPublisher.publish(cvImageRgba.toImageMsg());
 }
 
 QImage mat2QImage(const cv::Mat &mat) {
@@ -95,10 +111,19 @@ int main(int argc, char *argv[]) {
   // Init ROS
   ros::init(argc, argv, programName);
   ros::NodeHandle node("~");
+
+// Ros Topics
+  string rosPublisherTopic;
+  string rosPublisherTopicRgba;
+
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
+  node.param<string>("image_publisher_topic_rgba", rosPublisherTopicRgba, "/image/rgba");
+  ROS_INFO("[%s] image_publisher_topic: %s", programName.c_str(), rosPublisherTopic.c_str());
+  ROS_INFO("[%s] image_publisher_topic_rgb: %s", programName.c_str(), rosPublisherTopicRgba.c_str());
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
+  imageRGBAPublisher = imageTransport.advertise(rosPublisherTopicRgba, 1);
 
   QApplication app(argc, argv);
 
