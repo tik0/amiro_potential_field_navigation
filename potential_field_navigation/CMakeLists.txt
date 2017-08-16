@@ -80,5 +80,13 @@ target_link_libraries(potentialfield_merger_node
   ${catkin_LIBRARIES}
   )
 
+#potentialfield_to_amiro_kinematic_node
+add_executable(potentialfield_to_amiro_kinematic_node
+  src/potentialfield_to_amiro_kinematic_node.cpp)
+
+target_link_libraries(potentialfield_to_amiro_kinematic_node
+  ${catkin_LIBRARIES}
+  )
+
 file(COPY "patter" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 

@@ -13,14 +13,9 @@
 #include <image_transport/image_transport.h>
 
 // OpenCV
-#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include "potentialfield_image_converter.hpp"
-
-#include <omp.h>
-
 
 using namespace std;
 
@@ -48,7 +43,7 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
     for (int x = 0; x < potentialField.cols; x++) {
       cv::Point2i curpx(x, y);
       cv::Point diff = curpx - pose2d;
-      double distance = diff.x * diff.x + diff.y * diff.y;
+      double distance = sqrt(diff.x * diff.x + diff.y * diff.y);
       if (distance < potentialRadiusPixel) {
         cout << "debug" << curpx << endl;
         potentialField.at<cv::Vec2f>(y, x)[0] = diff.x * C;
@@ -72,24 +67,24 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, programName);
   ros::NodeHandle node("~");
 
-  string amiroOdomListenerScope;
-  string imagePublisherScope;
-  node.param<string>("amiro_odom_listener_scope", amiroOdomListenerScope, "/amiro1/odom");
-  node.param<string>("potentialfield_publisher_topic", imagePublisherScope, "/amiro1/potentialfield");
+  string amiroOdomListenerTopic;
+  string imagePublisherTopic;
+  node.param<string>("amiro_odom_listener_topic", amiroOdomListenerTopic, "/amiro1/odom");
+  node.param<string>("potentialfield_publisher_topic", imagePublisherTopic, "/amiro1/potentialfield");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
   node.param<double>("potential_radius", potentialRadius, 0.2);
   node.param<int>("image_width", imageWidth, 1000);
   node.param<int>("image_height", imageHeight, 1000);
-  ROS_INFO("[%s] image_listener_topic: %s", programName.c_str(), amiroOdomListenerScope.c_str());
-  ROS_INFO("[%s] potentialfield_publisher_topic: %s", programName.c_str(), imagePublisherScope.c_str());
+  ROS_INFO("[%s] image_listener_topic: %s", programName.c_str(), amiroOdomListenerTopic.c_str());
+  ROS_INFO("[%s] potentialfield_publisher_topic: %s", programName.c_str(), imagePublisherTopic.c_str());
   ROS_INFO("[%s] meter_per_pixel: %f", programName.c_str(), meterPerPixel);
   ROS_INFO("[%s] potential_radius: %f", programName.c_str(), potentialRadius);
   ROS_INFO("[%s] image_width: %d", programName.c_str(), imageWidth);
   ROS_INFO("[%s] image_height: %d", programName.c_str(), imageHeight);
 
   image_transport::ImageTransport imageTransport(node);
-  imagePublisher = imageTransport.advertise(imagePublisherScope, 1);
-  ros::Subscriber odom_sub = node.subscribe(amiroOdomListenerScope, 1, &process);
+  imagePublisher = imageTransport.advertise(imagePublisherTopic, 1);
+  ros::Subscriber odom_sub = node.subscribe(amiroOdomListenerTopic, 1, &process);
 
   ros::spin();
   return 0;

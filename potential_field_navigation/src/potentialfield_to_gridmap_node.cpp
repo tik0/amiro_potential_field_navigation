@@ -7,6 +7,7 @@
 // ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+
 // ROS - OpenCV_ Bridge
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -18,13 +19,9 @@
 #include <grid_map_ros/GridMapRosConverter.hpp>
 
 //OpenCV
-#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include "potentialfield_image_converter.hpp"
-
-#include <omp.h>
 
 using namespace std;
 
@@ -41,15 +38,13 @@ const string programName = "potentialfield_to_gridmap_node";
 double meterPerPixel;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
-//  cv::Mat potentialfield = (cv_bridge::toCvShare(msg, msg->encoding)->image;
-
-
   cv::Mat rgbCv = potentialfield_to_rgb_cv_mat(cv_bridge::toCvShare(msg, msg->encoding)->image);
   cv_bridge::CvImage cvImage;
   cvImage.header = msg->header;
   cvImage.encoding = sensor_msgs::image_encodings::RGB8;
   cvImage.image = rgbCv;
   sensor_msgs::ImagePtr rgbImage = cvImage.toImageMsg();
+
   // Nice idea but only works with normal RGB Images
   grid_map::GridMap gridmap;
   grid_map::GridMapRosConverter::initializeFromImage(*rgbImage, meterPerPixel, gridmap);

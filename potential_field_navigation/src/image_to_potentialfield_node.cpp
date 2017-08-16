@@ -7,14 +7,13 @@
 // ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+
 // ROS - OpenCV_ Bridge
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 
 // OpenCV
-#include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include <omp.h>
 
