@@ -21,7 +21,7 @@
 //OpenCV
 #include <opencv2/highgui/highgui.hpp>
 
-#include "potentialfield_image_converter.hpp"
+#include "vectorfield_image_converter.hpp"
 
 using namespace std;
 
@@ -38,17 +38,27 @@ const string programName = "potentialfield_to_gridmap_node";
 double meterPerPixel;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
-  cv::Mat rgbCv = potentialfield_to_rgb_cv_mat(cv_bridge::toCvShare(msg, msg->encoding)->image);
+  cv::Mat rgbCv = vectorfield_to_bgr_cv_mat(cv_bridge::toCvShare(msg, msg->encoding)->image);
+  cv::cvtColor(rgbCv, rgbCv, CV_BGR2RGB);
   cv_bridge::CvImage cvImage;
   cvImage.header = msg->header;
   cvImage.encoding = sensor_msgs::image_encodings::RGB8;
   cvImage.image = rgbCv;
   sensor_msgs::ImagePtr rgbImage = cvImage.toImageMsg();
 
+  cv::Mat mono;
+  cv::cvtColor(rgbCv, mono, CV_BGR2GRAY);
+//  cv::cvtColor(mono, mono, CV_GRAY2RGB);
+  cv_bridge::CvImage cvImageMono;
+  cvImageMono.header = msg->header;
+  cvImageMono.encoding = sensor_msgs::image_encodings::MONO8;
+  cvImageMono.image = mono;
+  sensor_msgs::ImagePtr monoImage = cvImageMono.toImageMsg();
+
   // Nice idea but only works with normal RGB Images
   grid_map::GridMap gridmap;
   grid_map::GridMapRosConverter::initializeFromImage(*rgbImage, meterPerPixel, gridmap);
-  grid_map::GridMapRosConverter::addLayerFromImage(*rgbImage, "elevation", gridmap);
+  grid_map::GridMapRosConverter::addLayerFromImage(*monoImage, "elevation", gridmap);
   grid_map::GridMapRosConverter::addColorLayerFromImage(*rgbImage, "color", gridmap);
   grid_map_msgs::GridMap gridmap_msg;
   grid_map::GridMapRosConverter::toMessage(gridmap, gridmap_msg);
@@ -63,7 +73,7 @@ int main(int argc, char *argv[]) {
   // Init ROS
   ros::init(argc, argv, programName);
   ros::NodeHandle node("~");
-  node.param<string>("potentialfield_listener_topic", rosListenerTopic, "/image/potentialfield");
+  node.param<string>("potentialfield_listener_topic", rosListenerTopic, "/image/vectorfield");
   node.param<string>("gridmap_publisher_topic", rosPublisherTopic, "/gridmap");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
   ROS_INFO("[%s] potentialfield_listener_topic: %s", programName.c_str(), rosListenerTopic.c_str());

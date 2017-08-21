@@ -15,7 +15,7 @@
 // OpenCV
 #include <opencv2/highgui/highgui.hpp>
 
-#include "potentialfield_image_converter.hpp"
+#include "vectorfield_image_converter.hpp"
 
 using namespace std;
 
@@ -52,7 +52,7 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
     }
   }
 
-//  cv::imshow("bla", potentialfield_to_rgb_cv_mat(potentialField));
+//  cv::imshow("bla", vectorfield_to_bgr_cv_mat(potentialField));
 //  cv::waitKey(0);
 
   cv_bridge::CvImage cvImage;

@@ -6,11 +6,10 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /GridMap1
         - /Amiro1_odom1/Shape1
         - /Amiro2_odom1/Shape1
         - /TF1/Frames1
-        - /MeshDisplayCustom1
-        - /ImageRGBA1
       Splitter Ratio: 0.5
     Tree Height: 491
   - Class: rviz/Selection
@@ -31,7 +30,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: Image
 Visualization Manager:
   Class: ""
   Displays:
@@ -69,11 +68,11 @@ Visualization Manager:
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
       Color: 200; 200; 200
-      Color Layer: elevation
-      Color Transformer: IntensityLayer
-      Enabled: false
+      Color Layer: color
+      Color Transformer: ColorLayer
+      Enabled: true
       Height Layer: elevation
-      Height Transformer: Flat
+      Height Transformer: Layer
       History Length: 1
       Invert Rainbow: false
       Max Color: 255; 255; 255
@@ -85,7 +84,7 @@ Visualization Manager:
       Topic: /gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: false
+      Value: true
     - Angle Tolerance: 0.100000001
       Class: rviz/Odometry
       Covariance:
@@ -159,139 +158,13 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
-        amiro1/base_link:
-          Value: true
-        amiro1/left_wheel_link:
-          Value: false
-        amiro1/odom:
-          Value: true
-        amiro1/proximity_floor_0:
-          Value: false
-        amiro1/proximity_floor_1:
-          Value: false
-        amiro1/proximity_floor_2:
-          Value: false
-        amiro1/proximity_floor_3:
-          Value: false
-        amiro1/proximity_ring_0:
-          Value: false
-        amiro1/proximity_ring_1:
-          Value: false
-        amiro1/proximity_ring_2:
-          Value: false
-        amiro1/proximity_ring_3:
-          Value: false
-        amiro1/proximity_ring_4:
-          Value: false
-        amiro1/proximity_ring_5:
-          Value: false
-        amiro1/proximity_ring_6:
-          Value: false
-        amiro1/proximity_ring_7:
-          Value: false
-        amiro1/right_wheel_link:
-          Value: false
-        amiro2/base_link:
-          Value: true
-        amiro2/left_wheel_link:
-          Value: false
-        amiro2/odom:
-          Value: true
-        amiro2/proximity_floor_0:
-          Value: false
-        amiro2/proximity_floor_1:
-          Value: false
-        amiro2/proximity_floor_2:
-          Value: false
-        amiro2/proximity_floor_3:
-          Value: false
-        amiro2/proximity_ring_0:
-          Value: false
-        amiro2/proximity_ring_1:
-          Value: false
-        amiro2/proximity_ring_2:
-          Value: false
-        amiro2/proximity_ring_3:
-          Value: false
-        amiro2/proximity_ring_4:
-          Value: false
-        amiro2/proximity_ring_5:
-          Value: false
-        amiro2/proximity_ring_6:
-          Value: false
-        amiro2/proximity_ring_7:
-          Value: false
-        amiro2/right_wheel_link:
-          Value: false
-        world:
-          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
       Show Names: true
       Tree:
-        world:
-          amiro1/odom:
-            amiro1/base_link:
-              amiro1/left_wheel_link:
-                {}
-              amiro1/proximity_floor_0:
-                {}
-              amiro1/proximity_floor_1:
-                {}
-              amiro1/proximity_floor_2:
-                {}
-              amiro1/proximity_floor_3:
-                {}
-              amiro1/proximity_ring_0:
-                {}
-              amiro1/proximity_ring_1:
-                {}
-              amiro1/proximity_ring_2:
-                {}
-              amiro1/proximity_ring_3:
-                {}
-              amiro1/proximity_ring_4:
-                {}
-              amiro1/proximity_ring_5:
-                {}
-              amiro1/proximity_ring_6:
-                {}
-              amiro1/proximity_ring_7:
-                {}
-              amiro1/right_wheel_link:
-                {}
-          amiro2/odom:
-            amiro2/base_link:
-              amiro2/left_wheel_link:
-                {}
-              amiro2/proximity_floor_0:
-                {}
-              amiro2/proximity_floor_1:
-                {}
-              amiro2/proximity_floor_2:
-                {}
-              amiro2/proximity_floor_3:
-                {}
-              amiro2/proximity_ring_0:
-                {}
-              amiro2/proximity_ring_1:
-                {}
-              amiro2/proximity_ring_2:
-                {}
-              amiro2/proximity_ring_3:
-                {}
-              amiro2/proximity_ring_4:
-                {}
-              amiro2/proximity_ring_5:
-                {}
-              amiro2/proximity_ring_6:
-                {}
-              amiro2/proximity_ring_7:
-                {}
-              amiro2/right_wheel_link:
-                {}
+        {}
       Update Interval: 0
       Value: true
     - Class: rviz_textured_quads/MeshDisplayCustom
@@ -312,6 +185,13 @@ Visualization Manager:
       Queue Size: 2
       Transport Hint: raw
       Unreliable: false
+      Value: false
+    - Class: rviz_textured_quads/MeshDisplayCustom
+      Enabled: false
+      Image Topic: /image
+      Meters per pixel: 0.00300000003
+      Name: MeshDisplayCustom
+      Quad Frame: world
       Value: false
   Enabled: true
   Global Options:
@@ -337,24 +217,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.13662481
+      Distance: 7.03385925
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0.00935932994
-        Y: -0.399335146
-        Z: -0.284377426
+        X: -1.38283741
+        Y: -0.192553028
+        Z: -0.650423169
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
+      Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.655397832
+      Pitch: 0.839796841
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.50175846
+      Yaw: 5.77494287
     Saved: ~
 Window Geometry:
   Displays:
