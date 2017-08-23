@@ -30,35 +30,26 @@ using namespace std;
 static image_transport::Publisher imagePublisher;
 
 // cv::Mat should be thread safe
-const std::size_t numFields = 3;
+const std::size_t numFields = 2;
 static std::vector<cv::Mat> fields(numFields);
 static std::vector<bool> dataArrived(numFields,false);
 std::mutex dataArrivedMtx;
 
-void processImage(const sensor_msgs::ImageConstPtr& msg) {
+void process1(const sensor_msgs::ImageConstPtr& msg) {
   const std::size_t id = 0;
   dataArrivedMtx.lock();
   dataArrived.at(id) = true;
   cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
-  ROS_DEBUG_STREAM("processImage, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
+  ROS_DEBUG_STREAM("process2, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
   dataArrivedMtx.unlock();
 }
 
-void processAmiro1(const sensor_msgs::ImageConstPtr& msg) {
+void process2(const sensor_msgs::ImageConstPtr& msg) {
   const std::size_t id = 1;
   dataArrivedMtx.lock();
   dataArrived.at(id) = true;
   cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
-  ROS_DEBUG_STREAM("processAmiro1, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
-  dataArrivedMtx.unlock();
-}
-
-void processAmiro2(const sensor_msgs::ImageConstPtr& msg) {
-  const std::size_t id = 2;
-  dataArrivedMtx.lock();
-  dataArrived.at(id) = true;
-  cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
-  ROS_DEBUG_STREAM("processAmiro2, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
+  ROS_DEBUG_STREAM("process1, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
   dataArrivedMtx.unlock();
 }
 
@@ -69,11 +60,10 @@ int main(int argc, char *argv[]) {
   ros::NodeHandle node("~");
 
   string vectorfieldPublisherTopic;
-  string imageVectorfieldListenerTopic, amiro1VectorfieldListenerTopic, amiro2VectorfieldListenerTopic;
+  string vectorfield1ListenerTopic, vectorfield2ListenerTopic;
   int fieldWidth, fieldHeight;
-  node.param<string>("image_vectorfield_listener_topic", imageVectorfieldListenerTopic, "/vectorfield/image");
-  node.param<string>("image_amiro1_listener_topic", amiro1VectorfieldListenerTopic, "/vectorfield/amiro1");
-  node.param<string>("image_amiro2_listener_topic", amiro2VectorfieldListenerTopic, "/vectorfield/amiro2");
+  node.param<string>("field1_listener_topic", vectorfield1ListenerTopic, "/vectorfield/amiro1");
+  node.param<string>("field2_listener_topic", vectorfield2ListenerTopic, "/vectorfield/amiro2");
   node.param<string>("vectorfield_publisher_topic", vectorfieldPublisherTopic, "/vectorfield/fused");
   node.param<int>("field_width", fieldWidth, 1000);
   node.param<int>("field_height", fieldHeight, 1000);
@@ -88,38 +78,29 @@ int main(int argc, char *argv[]) {
   cvImage.encoding = sensor_msgs::image_encodings::TYPE_32FC2;
   cv::Mat vectorfield_merged = cv::Mat(cv::Size(fieldWidth,fieldHeight), CV_32FC2);
 
-  image_transport::ImageTransport imageTransport(node);
-  image_transport::ImageTransport amiro1Transport(node);
-  image_transport::ImageTransport amiro2Transport(node);
-  imagePublisher = imageTransport.advertise(vectorfieldPublisherTopic, 1, true);
-  image_transport::Subscriber image_sub = imageTransport.subscribe(imageVectorfieldListenerTopic, 1, &processImage);
-  image_transport::Subscriber amiro1_sub = amiro1Transport.subscribe(amiro1VectorfieldListenerTopic, 1, &processAmiro1);
-  image_transport::Subscriber amiro2_sub = amiro2Transport.subscribe(amiro2VectorfieldListenerTopic, 1, &processAmiro2);
+  image_transport::ImageTransport fusedTransport(node);
+  image_transport::ImageTransport field1Transport(node);
+  image_transport::ImageTransport field2Transport(node);
+  imagePublisher = fusedTransport.advertise(vectorfieldPublisherTopic, 1, true);
+  image_transport::Subscriber field1_sub = field1Transport.subscribe(vectorfield1ListenerTopic, 1, &process1);
+  image_transport::Subscriber field2_sub = field2Transport.subscribe(vectorfield2ListenerTopic, 1, &process2);
 
   bool burnIn = true;
   ros::Rate rate(1);
   while(ros::ok()) {
     dataArrivedMtx.lock();
     if (!burnIn) {
-      bool doFusion = false;
-      for (auto it = dataArrived.begin(); it < dataArrived.end(); ++it) {
-        if (*it) {
-          doFusion = true;
-          *it = false;
-        }
-      }
-      if (doFusion) {
-        ROS_INFO_STREAM(ros::this_node::getName() << "STATE: Do fusion");
-        // Reset the old map
-        vectorfield_merged.setTo(cv::Scalar(cv::Vec2f(0.0f, 0.0f)));
+      if (dataArrived.at(0) || dataArrived.at(1)) {
+        dataArrived.at(0) = false;
+        dataArrived.at(1) = false;
+        ROS_INFO_STREAM(ros::this_node::getName() << " STATE: Do fusion");
         // Fuse
-        for (auto it = fields.begin(); it < fields.end(); ++it) {
-          if (it->cols != fieldWidth || it->rows != fieldHeight) {
-            ROS_WARN_STREAM(ros::this_node::getName() << " insufficient field size");
-            continue;
-          }
-          vectorfield_merged = vectorfield_merged + *it;
+        if (fields.at(0).cols != fieldWidth || fields.at(0).rows != fieldHeight ||
+            fields.at(1).cols != fieldWidth || fields.at(1).rows != fieldHeight) {
+          ROS_WARN_STREAM(ros::this_node::getName() << " insufficient field size");
+          continue;
         }
+        vectorfield_merged = fields.at(0) + fields.at(1);
         // Publish
         cvImage.image = vectorfield_merged;
         imagePublisher.publish(cvImage.toImageMsg());
@@ -128,11 +109,8 @@ int main(int argc, char *argv[]) {
       }
     } else {
       ROS_INFO_STREAM(ros::this_node::getName() << " STATE: Burn in");
-      burnIn = false;
-      for (auto it = dataArrived.begin(); it < dataArrived.end(); ++it) {
-        if (*it == false) {
-          burnIn = true; // Reset if any data haven't arrived yet
-        }
+      if (dataArrived.at(0) && dataArrived.at(1)) {
+        burnIn = false;
       }
     }
     dataArrivedMtx.unlock();

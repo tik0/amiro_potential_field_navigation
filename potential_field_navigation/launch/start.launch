@@ -67,7 +67,15 @@
   </node>
   
   <!--Fusion-->
+  <node name="vectorfield_merger_odom_node" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro1"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro2"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/amiro1_amiro2/fused"/>
+  </node>
   <node name="vectorfield_merger_node" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro1_amiro2/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/image"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/fused"/>
   </node>
   <node name="fusion_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
