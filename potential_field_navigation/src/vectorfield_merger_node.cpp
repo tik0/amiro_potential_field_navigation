@@ -5,8 +5,6 @@
 // Description : Receive all vectorfields and merger them.
 // ============================================================================
 
-#include <mutex>
-
 // ROS
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
@@ -33,24 +31,19 @@ static image_transport::Publisher imagePublisher;
 const std::size_t numFields = 2;
 static std::vector<cv::Mat> fields(numFields);
 static std::vector<bool> dataArrived(numFields,false);
-std::mutex dataArrivedMtx;
 
 void process1(const sensor_msgs::ImageConstPtr& msg) {
   const std::size_t id = 0;
-  dataArrivedMtx.lock();
   dataArrived.at(id) = true;
   cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
   ROS_DEBUG_STREAM("process2, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
-  dataArrivedMtx.unlock();
 }
 
 void process2(const sensor_msgs::ImageConstPtr& msg) {
   const std::size_t id = 1;
-  dataArrivedMtx.lock();
   dataArrived.at(id) = true;
   cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
   ROS_DEBUG_STREAM("process1, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
-  dataArrivedMtx.unlock();
 }
 
 int main(int argc, char *argv[]) {
@@ -88,7 +81,6 @@ int main(int argc, char *argv[]) {
   bool burnIn = true;
   ros::Rate rate(1);
   while(ros::ok()) {
-    dataArrivedMtx.lock();
     if (!burnIn) {
       if (dataArrived.at(0) || dataArrived.at(1)) {
         dataArrived.at(0) = false;
@@ -113,7 +105,6 @@ int main(int argc, char *argv[]) {
         burnIn = false;
       }
     }
-    dataArrivedMtx.unlock();
     ros::spinOnce();
     rate.sleep();
   }
