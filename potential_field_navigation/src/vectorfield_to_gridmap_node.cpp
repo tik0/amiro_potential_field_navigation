@@ -1,7 +1,8 @@
 // ============================================================================
-// Name        : potentialfield_to_gridmap_node.cpp
+// Name        : vectorfield_to_gridmap_node.cpp
 // Author      : Daniel Rudolph <drudolph@techfak.uni-bielefeld.de>
-// Description : Recieve a potentialfield and creates a grid_map.
+//               Timo Korthals <tkorthals@cit-ec.uni-bielefeld.de>
+// Description : Recieve a vectorfield and creates a grid_map.
 // ============================================================================
 
 // ROS
@@ -21,7 +22,7 @@
 //OpenCV
 #include <opencv2/highgui/highgui.hpp>
 
-#include "vectorfield_image_converter.hpp"
+#include "potential_field_utils.hpp"
 
 using namespace std;
 
@@ -31,31 +32,31 @@ string rosPublisherTopic;
 
 ros::Publisher gridMapPublisher;
 
-// program name
-const string programName = "potentialfield_to_gridmap_node";
-
 //params
 double meterPerPixel;
+std::string frame_id;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
-  cv::Mat rgbCv = vectorfield_to_bgr_cv_mat(cv_bridge::toCvShare(msg, msg->encoding)->image);
-  cv::cvtColor(rgbCv, rgbCv, CV_BGR2RGB);
+  cv::Mat vectorField = cv_bridge::toCvShare(msg, msg->encoding)->image;
+  cv::Mat hsv = vectorfield_to_hsv(vectorField);
+  cv::Mat rgb = hsv_to_rgb(hsv);
+
+  // Get the color
   cv_bridge::CvImage cvImage;
   cvImage.header = msg->header;
   cvImage.encoding = sensor_msgs::image_encodings::RGB8;
-  cvImage.image = rgbCv;
+  cvImage.image = rgb;
   sensor_msgs::ImagePtr rgbImage = cvImage.toImageMsg();
 
-  cv::Mat mono;
-  cv::cvtColor(rgbCv, mono, CV_BGR2GRAY);
-//  cv::cvtColor(mono, mono, CV_GRAY2RGB);
+  // Get the height
+  cv::Mat mono = hsv_to_gray(hsv);
   cv_bridge::CvImage cvImageMono;
   cvImageMono.header = msg->header;
   cvImageMono.encoding = sensor_msgs::image_encodings::MONO8;
   cvImageMono.image = mono;
   sensor_msgs::ImagePtr monoImage = cvImageMono.toImageMsg();
 
-  // Nice idea but only works with normal RGB Images
+  // Format the grid map
   grid_map::GridMap gridmap;
   grid_map::GridMapRosConverter::initializeFromImage(*rgbImage, meterPerPixel, gridmap);
   grid_map::GridMapRosConverter::addLayerFromImage(*monoImage, "elevation", gridmap);
@@ -63,22 +64,23 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   grid_map_msgs::GridMap gridmap_msg;
   grid_map::GridMapRosConverter::toMessage(gridmap, gridmap_msg);
 
-  gridmap_msg.info.header.frame_id = "world";
-  ROS_INFO("[%s] publish gridmap", programName.c_str());
+  gridmap_msg.info.header.frame_id = frame_id;
+  ROS_INFO("[%s] publish gridmap", ros::this_node::getName().c_str());
   gridMapPublisher.publish(gridmap_msg);
 }
 
 int main(int argc, char *argv[]) {
-  ROS_INFO("Start: %s", programName.c_str());
+  ROS_INFO("Start: %s", ros::this_node::getName().c_str());
   // Init ROS
-  ros::init(argc, argv, programName);
+  ros::init(argc, argv, ros::this_node::getName());
   ros::NodeHandle node("~");
-  node.param<string>("potentialfield_listener_topic", rosListenerTopic, "/image/vectorfield");
+  node.param<string>("vectorfield_listener_topic", rosListenerTopic, "/image/vectorfield");
   node.param<string>("gridmap_publisher_topic", rosPublisherTopic, "/gridmap");
+  node.param<string>("frame_id", frame_id, "world");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
-  ROS_INFO("[%s] potentialfield_listener_topic: %s", programName.c_str(), rosListenerTopic.c_str());
-  ROS_INFO("[%s] gridmap_publisher_topic: %s", programName.c_str(), rosPublisherTopic.c_str());
-  ROS_INFO("[%s] meter_per_pixel: %f", programName.c_str(), meterPerPixel);
+  ROS_INFO("[%s] potentialfield_listener_topic: %s", ros::this_node::getName().c_str(), rosListenerTopic.c_str());
+  ROS_INFO("[%s] gridmap_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
+  ROS_INFO("[%s] meter_per_pixel: %f", ros::this_node::getName().c_str(), meterPerPixel);
 
 
   gridMapPublisher = node.advertise<grid_map_msgs::GridMap>(rosPublisherTopic, 1, true);

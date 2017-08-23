@@ -44,5 +44,7 @@
     <arg name="enable_rfid_mockup" value="false" />
   </include>
 
+  <!--   <node name="rqt_topic" pkg="rqt_topic" type="rqt_topic"/> -->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" output="screen" respawn="true"/>
 
 </launch>

@@ -1,6 +1,7 @@
 // ============================================================================
 // Name        : image_selecter_node.cpp
 // Author      : Daniel Rudolph <drudolph@techfak.uni-bielefeld.de>
+//               Timo Korthals <tkorthals@cit-ec.uni-bielefeld.de>
 // Description : Creates a GUI to select a image for publishing it.
 // ============================================================================
 
@@ -36,9 +37,6 @@ using namespace std;
 static image_transport::Publisher imagePublisher;
 static image_transport::Publisher imageRGBAPublisher;
 
-// program name
-const string programName = "image_selecter_node";
-
 cv::Mat cv_image;
 QImage qt_image;
 
@@ -64,7 +62,7 @@ GUI::GUI(QWidget *parent) : QWidget(parent) {
   image_label->setScaledContents(true);
 
   this->setMinimumSize(500, 500);
-  this->setWindowTitle(QString::fromStdString(programName));
+  this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
 }
 
 void GUI::selectImage() {
@@ -84,7 +82,7 @@ void GUI::selectImage() {
 
 void GUI::publishImage() {
   if (!imageSelected) {
-    ROS_WARN("[%s] Please seletect an image first.", programName.c_str());
+    ROS_WARN("[%s] Please seletect an image first.", ros::this_node::getName().c_str());
     return;
   }
   cv_bridge::CvImage cvImage;
@@ -108,9 +106,9 @@ QImage mat2QImage(const cv::Mat &mat) {
 }
 
 int main(int argc, char *argv[]) {
-  ROS_INFO("Start: %s", programName.c_str());
+  ROS_INFO_STREAM("Start: " << ros::this_node::getName());
   // Init ROS
-  ros::init(argc, argv, programName);
+  ros::init(argc, argv, ros::this_node::getName());
   ros::NodeHandle node("~");
 
 // Ros Topics
@@ -119,8 +117,8 @@ int main(int argc, char *argv[]) {
 
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
   node.param<string>("image_publisher_topic_rgba", rosPublisherTopicRgba, "/image/rgba");
-  ROS_INFO("[%s] image_publisher_topic: %s", programName.c_str(), rosPublisherTopic.c_str());
-  ROS_INFO("[%s] image_publisher_topic_rgb: %s", programName.c_str(), rosPublisherTopicRgba.c_str());
+  ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
+  ROS_INFO("[%s] image_publisher_topic_rgb: %s", ros::this_node::getName().c_str(), rosPublisherTopicRgba.c_str());
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);

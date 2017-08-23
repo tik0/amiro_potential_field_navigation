@@ -39,19 +39,19 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   include/
 )
-#image_to_potentialfield_node
-add_executable(image_to_potentialfield_node
-  src/image_to_potentialfield_node.cpp)
+#image_to_vectorfield_node
+add_executable(image_to_vectorfield_node
+  src/image_to_vectorfield_node.cpp)
 
-target_link_libraries(image_to_potentialfield_node
+target_link_libraries(image_to_vectorfield_node
   ${catkin_LIBRARIES}
   )
 
-#potentialfield_to_gridmap_node
-add_executable(potentialfield_to_gridmap_node
-  src/potentialfield_to_gridmap_node.cpp)
+#vectorfield_to_gridmap_node
+add_executable(vectorfield_to_gridmap_node
+  src/vectorfield_to_gridmap_node.cpp)
 
-target_link_libraries(potentialfield_to_gridmap_node
+target_link_libraries(vectorfield_to_gridmap_node
   ${catkin_LIBRARIES}
   )
 
@@ -64,19 +64,19 @@ target_link_libraries(image_selecter_node
   Qt5::Widgets
   )
 
-#amiro_odom_to_potentialfield_node
-add_executable(amiro_odom_to_potentialfield_node
-  src/amiro_odom_to_potentialfield_node.cpp)
+#odom_to_vectorfield_node
+add_executable(odom_to_vectorfield_node
+  src/odom_to_vectorfield_node.cpp)
 
-target_link_libraries(amiro_odom_to_potentialfield_node
+target_link_libraries(odom_to_vectorfield_node
   ${catkin_LIBRARIES}
   )
 
-#potentialfield_merger_node
-add_executable(potentialfield_merger_node
-  src/potentialfield_merger_node.cpp)
+#vectorfield_merger_node
+add_executable(vectorfield_merger_node
+  src/vectorfield_merger_node.cpp)
 
-target_link_libraries(potentialfield_merger_node
+target_link_libraries(vectorfield_merger_node
   ${catkin_LIBRARIES}
   )
 

@@ -11,7 +11,7 @@ class GUI : public QWidget {
 public:
   explicit GUI(QWidget *parent = 0);
 
-public slots:
+public:
 
   void selectImage();
 
