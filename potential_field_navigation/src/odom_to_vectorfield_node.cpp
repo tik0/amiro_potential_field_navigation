@@ -22,10 +22,11 @@ using namespace std;
 
 #define C 128
 //params
-float heuristic_abs_min, heuristic_factor;
-double meterPerPixel;
-int imageWidth;
-int imageHeight;
+static float heuristic_abs_min, heuristic_factor;
+static int heuristic_apply;
+static double meterPerPixel;
+static int imageWidth;
+static int imageHeight;
 
 // ros::Publisher rosPublisher;
 static image_transport::Publisher imagePublisherPot, imagePublisherVec;
@@ -59,7 +60,10 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
   for (int y = 0; y < potentialField.rows; y++) {
     for (int x = 0; x < potentialField.cols; x++) {
       if (x != pose2d.x || y != pose2d.y) {
-        potentialField.at<float>(y, x) = 1.0f / sqrt(pow(x-pose2d.x,2) + pow(y-pose2d.y,2));
+        const float xDiff = x-pose2d.x;
+        const float yDiff = y-pose2d.y;
+        // We assume a positive charge (s.t. repelling)
+        potentialField.at<float>(y, x) = 1.0 / sqrt(xDiff*xDiff + yDiff*yDiff);
       }
     }
   }
@@ -68,19 +72,22 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
   cv::Mat vectorField = potentialfield_to_vectorfield(potentialField);
 
   // Apply heuristics
-  for (int idx = 0; idx < potentialField.rows * potentialField.cols; ++idx) {
-    float &x = vectorField.at<cv::Vec2f>(idx)[0];
-    float &y = vectorField.at<cv::Vec2f>(idx)[1];
-    const float abs = sqrt(x*x + y*y);
-    if (abs > heuristic_abs_min) {
-      x = 0.0;
-      y = 0.0;
-    } else {
-      x = ((abs / heuristic_abs_min) * heuristic_factor) * (x / abs);
-      y = ((abs / heuristic_abs_min) * heuristic_factor) * (y / abs);
+  if (heuristic_apply) {
+    for (int idx = 0; idx < potentialField.rows * potentialField.cols; ++idx) {
+      float &x = vectorField.at<cv::Vec2f>(idx)[0];
+      float &y = vectorField.at<cv::Vec2f>(idx)[1];
+      const float abs = sqrt(x*x + y*y);
+      if (abs > heuristic_abs_min) {
+        x = 0.0;
+        y = 0.0;
+      } else {
+        x = ((abs / heuristic_abs_min) * heuristic_factor) * (x / abs);
+        y = ((abs / heuristic_abs_min) * heuristic_factor) * (y / abs);
+      }
     }
   }
 
+  // Send the data
   cv_bridge::CvImage cvImagePot;
   cvImagePot.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
   cvImagePot.image = potentialField;
@@ -103,6 +110,7 @@ int main(int argc, char *argv[]) {
   node.param<string>("potentialfield_publisher_topic", rosPublisherTopicPot, "/potentialfield/amiro1");
   node.param<string>("vectorfield_publisher_topic", rosPublisherTopicVec, "/vectorfield/amiro1");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
+  node.param<int>("heuristic_apply", heuristic_apply, 1);
   node.param<float>("heuristic_abs_min", heuristic_abs_min, 0.2);
   node.param<float>("heuristic_factor", heuristic_factor, 0.2);
   node.param<int>("image_width", imageWidth, 1000);
@@ -115,6 +123,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] image_width: %d", ros::this_node::getName().c_str(), imageWidth);
   ROS_INFO("[%s] image_height: %d", ros::this_node::getName().c_str(), imageHeight);
   ROS_INFO("[%s] minimum_pose_difference_pixel: %d", ros::this_node::getName().c_str(), minPoseDiff_pixel);
+
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisherPot = imageTransport.advertise(rosPublisherTopicPot, 1, true);

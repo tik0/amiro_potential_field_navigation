@@ -38,7 +38,7 @@ std::string frame_id;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat vectorField = cv_bridge::toCvShare(msg, msg->encoding)->image;
-  cv::Mat hsv = vectorfield_to_hsv(vectorField);
+  cv::Mat hsv = vectorfield_to_hsv(vectorField, ros::this_node::getName());
   cv::Mat rgb = hsv_to_rgb(hsv);
 
   // Get the color

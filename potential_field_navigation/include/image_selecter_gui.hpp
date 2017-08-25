@@ -10,6 +10,7 @@ class GUI : public QWidget {
 
 public:
   explicit GUI(QWidget *parent = 0);
+  ~GUI();
 
 public:
 
@@ -17,11 +18,21 @@ public:
 
   void publishImage();
 
+  QImage mat2QImage(const cv::Mat &mat) {
+    return QImage((const unsigned char *) (mat.data), mat.cols, mat.rows, QImage::Format_Grayscale8);
+  }
+
 private:
 
-  QLabel *image_label;
-  QPushButton *image_select;
+//  QPushButton *image_select;
   QPushButton *publish_image;
+  QLabel *image_label;
+  QPushButton *image_selecter;
+  cv::Mat cv_image;
+  QImage qt_image;
+  QLabel *label;
+  bool imageSelected = false;
+
 };
 
 #endif //_IMAGE_SELECTER_GUI_HPP_

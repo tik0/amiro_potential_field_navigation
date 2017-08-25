@@ -32,27 +32,20 @@
 
 using namespace std;
 
-
-// ros::Publisher rosPublisher;
 static image_transport::Publisher imagePublisher;
 static image_transport::Publisher imageRGBAPublisher;
 
-cv::Mat cv_image;
-QImage qt_image;
-
-bool imageSelected = false;
-
 GUI::GUI(QWidget *parent) : QWidget(parent) {
 
-  QLabel *image_label = new QLabel(this);
+  image_label = new QLabel(this);
   image_label->setGeometry(200, 0, 100, 100);
   image_label->setText(QString::fromStdString("image label"));
 
-  QPushButton *image_selecter = new QPushButton("select image", this);
+  image_selecter = new QPushButton("select image", this);
   image_selecter->setGeometry(0, 0, button_width, button_height);
   QObject::connect(image_selecter, &QPushButton::clicked, this, &GUI::selectImage);
 
-  QPushButton *publish_image = new QPushButton("publish image", this);
+  publish_image = new QPushButton("publish image", this);
   publish_image->setGeometry(100, 0, button_width, button_height);
   QObject::connect(publish_image, &QPushButton::clicked, this, &GUI::publishImage);
 
@@ -63,15 +56,25 @@ GUI::GUI(QWidget *parent) : QWidget(parent) {
 
   this->setMinimumSize(500, 500);
   this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
+
+  label = new QLabel(this);
+}
+
+GUI::~GUI() {
+  delete label;
+  delete publish_image;
+  delete image_selecter;
+  delete image_label;
 }
 
 void GUI::selectImage() {
   QString fileName = QFileDialog::getOpenFileName(this, QString::fromStdString("Open image"), QString::fromStdString("../patter/"), QString::fromStdString("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
   cv_image = cv::imread(fileName.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+  qt_image = mat2QImage(cv_image);
 
-  qt_image.load(fileName);
-  QLabel *label = new QLabel(this);
+//  qt_image.load(fileName, Q_NULLPTR);
+
   label->setPixmap(QPixmap::fromImage(qt_image));
   image_label = label;
   this->setMinimumSize(qt_image.width(), qt_image.height() + button_height);
@@ -82,7 +85,7 @@ void GUI::selectImage() {
 
 void GUI::publishImage() {
   if (!imageSelected) {
-    ROS_WARN("[%s] Please seletect an image first.", ros::this_node::getName().c_str());
+    ROS_WARN("[%s] Please selected an image first.", ros::this_node::getName().c_str());
     return;
   }
   cv_bridge::CvImage cvImage;
@@ -91,7 +94,7 @@ void GUI::publishImage() {
   imagePublisher.publish(cvImage.toImageMsg());
 
   //TODO
-  // Publish image aswell as RGB for visualization
+  // Publish image as well as RGB for visualization
   cv::Mat rgbaImage;
   cv::cvtColor(cv_image,rgbaImage, CV_GRAY2RGBA);
   cv_bridge::CvImage cvImageRgba;
@@ -99,10 +102,6 @@ void GUI::publishImage() {
   cvImageRgba.encoding = sensor_msgs::image_encodings::BGRA8;
   cvImageRgba.image = rgbaImage;
   imageRGBAPublisher.publish(cvImageRgba.toImageMsg());
-}
-
-QImage mat2QImage(const cv::Mat &mat) {
-  return QImage((const unsigned char *) (mat.data), mat.cols, mat.rows, QImage::Format_Mono);
 }
 
 int main(int argc, char *argv[]) {
@@ -128,6 +127,7 @@ int main(int argc, char *argv[]) {
 
   GUI gui;
   gui.show();
+
 
   return app.exec();
 }

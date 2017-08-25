@@ -4,10 +4,13 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
+        - /PotentialField_Image1
+        - /PotentialField_Image1/Status1
+        - /GridMap_Image1
         - /Amiro1_odom1/Shape1
         - /Amiro2_odom1/Shape1
         - /TF1/Frames1
-        - /GridMap_Fused1
       Splitter Ratio: 0.5
     Tree Height: 377
   - Class: rviz/Selection
@@ -58,7 +61,7 @@ Visualization Manager:
       Min Value: 0
       Name: PotentialField_Image
       Normalize Range: true
-      Queue Size: 2
+      Queue Size: 1
       Transport Hint: raw
       Unreliable: false
       Value: true
@@ -116,13 +119,13 @@ Visualization Manager:
       Unreliable: false
       Use Rainbow: true
       Value: false
-    - Alpha: 1
+    - Alpha: 0.100000001
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: false
+      Enabled: true
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -136,7 +139,7 @@ Visualization Manager:
       Topic: /vectorfield/image/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: false
+      Value: true
     - Angle Tolerance: 0.100000001
       Class: rviz/Odometry
       Covariance:
@@ -216,63 +219,7 @@ Visualization Manager:
           Value: true
         amiro1/odom:
           Value: true
-        amiro1/proximity_floor_0:
-          Value: true
-        amiro1/proximity_floor_1:
-          Value: true
-        amiro1/proximity_floor_2:
-          Value: true
-        amiro1/proximity_floor_3:
-          Value: true
-        amiro1/proximity_ring_0:
-          Value: true
-        amiro1/proximity_ring_1:
-          Value: true
-        amiro1/proximity_ring_2:
-          Value: true
-        amiro1/proximity_ring_3:
-          Value: true
-        amiro1/proximity_ring_4:
-          Value: true
-        amiro1/proximity_ring_5:
-          Value: true
-        amiro1/proximity_ring_6:
-          Value: true
-        amiro1/proximity_ring_7:
-          Value: true
         amiro1/right_wheel_link:
-          Value: true
-        amiro2/base_link:
-          Value: true
-        amiro2/left_wheel_link:
-          Value: true
-        amiro2/odom:
-          Value: true
-        amiro2/proximity_floor_0:
-          Value: true
-        amiro2/proximity_floor_1:
-          Value: true
-        amiro2/proximity_floor_2:
-          Value: true
-        amiro2/proximity_floor_3:
-          Value: true
-        amiro2/proximity_ring_0:
-          Value: true
-        amiro2/proximity_ring_1:
-          Value: true
-        amiro2/proximity_ring_2:
-          Value: true
-        amiro2/proximity_ring_3:
-          Value: true
-        amiro2/proximity_ring_4:
-          Value: true
-        amiro2/proximity_ring_5:
-          Value: true
-        amiro2/proximity_ring_6:
-          Value: true
-        amiro2/proximity_ring_7:
-          Value: true
-        amiro2/right_wheel_link:
           Value: true
         world:
           Value: true
@@ -287,61 +234,7 @@ Visualization Manager:
             amiro1/base_link:
               amiro1/left_wheel_link:
                 {}
-              amiro1/proximity_floor_0:
-                {}
-              amiro1/proximity_floor_1:
-                {}
-              amiro1/proximity_floor_2:
-                {}
-              amiro1/proximity_floor_3:
-                {}
-              amiro1/proximity_ring_0:
-                {}
-              amiro1/proximity_ring_1:
-                {}
-              amiro1/proximity_ring_2:
-                {}
-              amiro1/proximity_ring_3:
-                {}
-              amiro1/proximity_ring_4:
-                {}
-              amiro1/proximity_ring_5:
-                {}
-              amiro1/proximity_ring_6:
-                {}
-              amiro1/proximity_ring_7:
-                {}
               amiro1/right_wheel_link:
-                {}
-          amiro2/odom:
-            amiro2/base_link:
-              amiro2/left_wheel_link:
-                {}
-              amiro2/proximity_floor_0:
-                {}
-              amiro2/proximity_floor_1:
-                {}
-              amiro2/proximity_floor_2:
-                {}
-              amiro2/proximity_floor_3:
-                {}
-              amiro2/proximity_ring_0:
-                {}
-              amiro2/proximity_ring_1:
-                {}
-              amiro2/proximity_ring_2:
-                {}
-              amiro2/proximity_ring_3:
-                {}
-              amiro2/proximity_ring_4:
-                {}
-              amiro2/proximity_ring_5:
-                {}
-              amiro2/proximity_ring_6:
-                {}
-              amiro2/proximity_ring_7:
-                {}
-              amiro2/right_wheel_link:
                 {}
       Update Interval: 0
       Value: true
@@ -351,7 +244,7 @@ Visualization Manager:
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: true
+      Enabled: false
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -365,12 +258,12 @@ Visualization Manager:
       Topic: /vectorfield/fused/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: true
+      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: world
-    Frame Rate: 30
+    Frame Rate: 10
   Name: root
   Tools:
     - Class: rviz/Interact
@@ -397,18 +290,18 @@ Visualization Manager:
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.147674128
+        Y: -0.715452373
+        Z: 0.218867779
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.02979636
-      Target Frame: amiro1/base_link
+      Pitch: 1.05979598
+      Target Frame: world
       Value: Orbit (rviz)
-      Yaw: 1.83039629
+      Yaw: 4.29539347
     Saved: ~
 Window Geometry:
   "&Displays":

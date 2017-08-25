@@ -33,41 +33,43 @@
   
   
   <!--AMiRo 1 Odometry-->
-  <node name="odom1_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+<!--  <node name="odom1_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
     <param name="frame_id" value="world"/>
     <param name="amiro_odom_listener_topic" value="/amiro1/odom"/>
     <param name="potentialfield_publisher_topic" value="/potentialfield/amiro1"/>
     <param name="vectorfield_publisher_topic" value="/vectorfield/amiro1"/>
-    <param name="heuristic_abs_min" value="0.1"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+    <param name="heuristic_abs_min" value="0.01"/> <?Undefined An arbitrary value which indecates the start of value decay?>
     <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+    <param name="minimum_pose_difference_pixel" value="10.0"/> <?Only recalculate the map if the robot has moved that much?>
   </node>
   <node name="odom1_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/amiro1"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/amiro1/gridmap"/>
-  </node>
+  </node>-->
   
   <!--AMiRo 2 Odometry-->
-  <node name="odom2_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+<!--  <node name="odom2_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
     <param name="frame_id" value="world"/>
     <param name="amiro_odom_listener_topic" value="/amiro2/odom"/>
     <param name="potentialfield_publisher_topic" value="/potentialfield/amiro2"/>
     <param name="vectorfield_publisher_topic" value="/vectorfield/amiro2"/>
-    <param name="heuristic_abs_min" value="0.1"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+    <param name="heuristic_abs_min" value="0.01"/> <?Undefined An arbitrary value which indecates the start of value decay?>
     <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+    <param name="minimum_pose_difference_pixel" value="10.0"/> <?Only recalculate the map if the robot has moved that much?>
   </node>
   <node name="odom2_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/amiro2"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/amiro2/gridmap"/>
-  </node>
+  </node>-->
   
   <!--Fusion-->
-  <node name="vectorfield_merger_odom_node" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+<!--  <node name="vectorfield_merger_odom_node" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
     <param name="field1_listener_topic" value="/vectorfield/amiro1"/>
     <param name="field2_listener_topic" value="/vectorfield/amiro2"/>
     <param name="vectorfield_publisher_topic" value="/vectorfield/amiro1_amiro2/fused"/>
@@ -82,5 +84,13 @@
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/fused"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/fused/gridmap"/>
+  </node>-->
+  
+  <!--Steering-->
+  <node name="amiro1_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+    <param name="meter_per_pixel" value="0.003"/>
+    <param name="frame_id" value="world"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/image"/>
+    <param name="amiro_odom_listener_topic" value="/amiro1/odom"/>
   </node>
 </launch>

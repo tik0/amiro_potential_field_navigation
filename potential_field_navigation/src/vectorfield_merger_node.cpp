@@ -81,6 +81,7 @@ int main(int argc, char *argv[]) {
   bool burnIn = true;
   ros::Rate rate(1);
   while(ros::ok()) {
+    ros::spinOnce();
     if (!burnIn) {
       if (dataArrived.at(0) || dataArrived.at(1)) {
         dataArrived.at(0) = false;
@@ -105,7 +106,6 @@ int main(int argc, char *argv[]) {
         burnIn = false;
       }
     }
-    ros::spinOnce();
     rate.sleep();
   }
   return 0;

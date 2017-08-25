@@ -80,11 +80,11 @@ target_link_libraries(vectorfield_merger_node
   ${catkin_LIBRARIES}
   )
 
-#potentialfield_to_amiro_kinematic_node
-add_executable(potentialfield_to_amiro_kinematic_node
-  src/potentialfield_to_amiro_kinematic_node.cpp)
+#vectorfield_to_kinematic_node
+add_executable(vectorfield_to_kinematic_node
+  src/vectorfield_to_kinematic_node.cpp)
 
-target_link_libraries(potentialfield_to_amiro_kinematic_node
+target_link_libraries(vectorfield_to_kinematic_node
   ${catkin_LIBRARIES}
   )
 
