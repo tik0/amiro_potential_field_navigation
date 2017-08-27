@@ -92,5 +92,7 @@
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/image"/>
     <param name="amiro_odom_listener_topic" value="/amiro1/odom"/>
+    <param name="velocityScale_meterPerSecond" value="0.1"/>
+    <param name="angularScale_radPerSecond" value="0.5"/>
   </node>
 </launch>

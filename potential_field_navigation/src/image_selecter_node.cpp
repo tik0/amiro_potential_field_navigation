@@ -17,13 +17,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-// Qt5 Widgets
-#include <QWidget>
-#include <QMainWindow>
-#include <QFileDialog>
-#include <QApplication>
-#include <QPushButton>
-#include <QLabel>
 #include "image_selecter_gui.hpp"
 
 
@@ -33,7 +26,6 @@
 using namespace std;
 
 static image_transport::Publisher imagePublisher;
-static image_transport::Publisher imageRGBAPublisher;
 
 GUI::GUI(QWidget *parent) : QWidget(parent) {
 
@@ -49,6 +41,17 @@ GUI::GUI(QWidget *parent) : QWidget(parent) {
   publish_image->setGeometry(100, 0, button_width, button_height);
   QObject::connect(publish_image, &QPushButton::clicked, this, &GUI::publishImage);
 
+  checkboxLoadAsGray = new QCheckBox("As mono", this);
+  checkboxLoadAsGray->setGeometry(200, 0, button_width, button_height);
+  checkboxLoadAsGray->setChecked(true);
+
+  checkboxInvGray = new QCheckBox("Invert", this);
+  checkboxInvGray->setGeometry(300, 0, button_width, button_height);
+  checkboxInvGray->setChecked(false);
+
+  checkboxSendAsCurrent = new QCheckBox("As current", this);
+  checkboxSendAsCurrent->setGeometry(400, 0, button_width, button_height);
+  checkboxSendAsCurrent->setChecked(false);
 
   image_label->setBackgroundRole(QPalette::Base);
   image_label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -62,6 +65,9 @@ GUI::GUI(QWidget *parent) : QWidget(parent) {
 
 GUI::~GUI() {
   delete label;
+  delete checkboxSendAsCurrent;
+  delete checkboxLoadAsGray;
+  delete checkboxInvGray;
   delete publish_image;
   delete image_selecter;
   delete image_label;
@@ -70,10 +76,40 @@ GUI::~GUI() {
 void GUI::selectImage() {
   QString fileName = QFileDialog::getOpenFileName(this, QString::fromStdString("Open image"), QString::fromStdString("../patter/"), QString::fromStdString("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
-  cv_image = cv::imread(fileName.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
-  qt_image = mat2QImage(cv_image);
+  // Check if loading as grayscale
+  if (checkboxLoadAsGray->checkState() == Qt::CheckState::Checked) {
+    cv_image = cv::imread(fileName.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+  } else {
+    cv_image = cv::imread(fileName.toStdString(), CV_LOAD_IMAGE_COLOR);
+  }
 
-//  qt_image.load(fileName, Q_NULLPTR);
+  // Invert the color channel if necessary
+  if (cv_image.channels() == 1) {
+    ROS_INFO_STREAM( ros::this_node::getName() << " loaded gray scale image");
+    std::vector<cv::Mat> array_to_merge(3);
+    cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
+    if (checkboxInvGray->checkState() == Qt::CheckState::Checked) {
+      cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
+      dummy.copyTo(array_to_merge.at(0));
+      dummy.copyTo(array_to_merge.at(1));
+      cv_image.copyTo(array_to_merge.at(2));
+    } else {
+      dummy.copyTo(array_to_merge.at(2));
+      dummy.copyTo(array_to_merge.at(1));
+      cv_image.copyTo(array_to_merge.at(0));
+    }
+    cv::merge(array_to_merge, cv_image);
+  } else if (cv_image.channels() == 3) {
+    ROS_INFO_STREAM( ros::this_node::getName() << " loaded BGR image");
+  } else {
+    ROS_ERROR_STREAM( ros::this_node::getName() << " Unsupported number of channels");
+    return;
+  }
+
+  // Display the image
+  cv::Mat rgb;
+  cv::cvtColor(cv_image, rgb, CV_BGR2RGB);
+  qt_image = mat2QImage(rgb);
 
   label->setPixmap(QPixmap::fromImage(qt_image));
   image_label = label;
@@ -89,19 +125,16 @@ void GUI::publishImage() {
     return;
   }
   cv_bridge::CvImage cvImage;
-  cvImage.encoding = sensor_msgs::image_encodings::MONO8;
+  cvImage.encoding = sensor_msgs::image_encodings::BGR8;
   cvImage.image = cv_image;
+  if (checkboxSendAsCurrent->checkState() == Qt::CheckState::Checked) {
+    std::cerr << "Send as current" << std::endl;
+    cvImage.header.frame_id = "current";
+  } else {
+    cvImage.header.frame_id = "charge";
+    std::cerr << "Send as charge" << std::endl;
+  }
   imagePublisher.publish(cvImage.toImageMsg());
-
-  //TODO
-  // Publish image as well as RGB for visualization
-  cv::Mat rgbaImage;
-  cv::cvtColor(cv_image,rgbaImage, CV_GRAY2RGBA);
-  cv_bridge::CvImage cvImageRgba;
-//  cvImageRgba.encoding = sensor_msgs::image_encodings::TYPE_8UC4;
-  cvImageRgba.encoding = sensor_msgs::image_encodings::BGRA8;
-  cvImageRgba.image = rgbaImage;
-  imageRGBAPublisher.publish(cvImageRgba.toImageMsg());
 }
 
 int main(int argc, char *argv[]) {
@@ -112,16 +145,12 @@ int main(int argc, char *argv[]) {
 
 // Ros Topics
   string rosPublisherTopic;
-  string rosPublisherTopicRgba;
 
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
-  node.param<string>("image_publisher_topic_rgba", rosPublisherTopicRgba, "/image/rgba");
   ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
-  ROS_INFO("[%s] image_publisher_topic_rgb: %s", ros::this_node::getName().c_str(), rosPublisherTopicRgba.c_str());
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
-  imageRGBAPublisher = imageTransport.advertise(rosPublisherTopicRgba, 1);
 
   QApplication app(argc, argv);
 

@@ -35,7 +35,7 @@ static float angularScale_radPerSecond = 0.1;
 void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) {
 
   cv::Point2i pose2d(pose2pixel(odom->pose.pose, vectorfield.cols, vectorfield.rows, meterPerPixel));
-  if (pose2d.x < 0 || pose2d.x > vectorfield.cols || pose2d.y < 0 || pose2d.y > vectorfield.rows) {
+  if (pose2d.x < 0 || pose2d.x >= vectorfield.cols || pose2d.y < 0 || pose2d.y >= vectorfield.rows) {
     ROS_WARN("[%s] Current AMiRo pose2d %d %d is not in image.", ros::this_node::getName().c_str(), pose2d.x, pose2d.y);
     return;
   }
@@ -43,18 +43,20 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   // IMPORTANT: We assume the orientation of the robot resides in the world frame
   // Get the vector in the vectorfield at robot position
   cv::Point2f vector(vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[0], vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[1]);
-  float vectorAbs = sqrt(vector.dot(vector));
+  const float vectorAbs = sqrt(vector.dot(vector));
   cv::Point2f vectorUnit(vector.x / vectorAbs, vector.y / vectorAbs);
-  float vectorAngle = atan2(vector.x, vector.y);
+  const double vectorAngle = atan2(vector.x, vector.y);
 
   // Get the robot information
-  float robotAngle = tf::getYaw(odom->pose.pose.orientation);
+  const double robotAngle = tf::getYaw(odom->pose.pose.orientation);
 
   // Calculate the steering vector
   geometry_msgs::Twist twist;
   twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
-  twist.angular.z = angularScale_radPerSecond * fmod((vectorAngle - robotAngle) + 2 * M_PI, 2 * M_PI);
-  ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: "<< vectorAbs << ", robotAngle: "<< robotAngle *180/M_PI << ", vectorAngle: " << vectorAngle * 180/M_PI << ", diff: " << fmod((vectorAngle - robotAngle) + 2 * M_PI, 2 * M_PI) * 180/M_PI);
+  float angleDiff = getAngleDiff(robotAngle, vectorAngle);
+  angleDiff = angleDiff > M_PI ? 2 * M_PI - angleDiff : angleDiff;
+  twist.angular.z = angularScale_radPerSecond * angleDiff;
+  ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: "<< vectorAbs << ", robotAngle: "<< robotAngle *180/M_PI << ", vectorAngle: " << vectorAngle * 180/M_PI << ", diff: " << angleDiff * 180/M_PI);
   pub.publish(twist);
 }
 
@@ -92,6 +94,8 @@ int main(int argc, char *argv[]) {
   node.param<string>("amiro_odom_listener_topic", amiroOdomListenerTopic, "/amiro1/odom");
   node.param<string>("twist_publisher_topic", twistPublisherTopic, "/amiro1/cmd_vel");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
+  node.param<float>("velocityScale_meterPerSecond", velocityScale_meterPerSecond, 0.1);
+  node.param<float>("angularScale_radPerSecond", angularScale_radPerSecond, 0.1);
   node.param<int>("syncTopics", syncTopics, 0);
   ROS_INFO("[%s] vectorfield_listener_topic: %s", ros::this_node::getName().c_str(), vectorfield_listener_topic.c_str());
   ROS_INFO("[%s] amiro_odom_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());

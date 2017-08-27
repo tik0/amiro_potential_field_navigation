@@ -16,6 +16,29 @@
 #include <geometry_msgs/Pose.h>
 
 /**
+ * Returns the minimum angle difference between the origin and target
+ * @param origin Angle taken as reference
+ * @param target Angle taken as target
+ * @return Minimum difference
+ */
+double
+getAngleDiff(double origin, double target) {
+
+  // Get the angle between 0 .. 2 PI
+  origin = fmod(origin + 2 * M_PI, 2 * M_PI);
+  target = fmod(target + 2 * M_PI, 2 * M_PI);
+
+  // Calculate the steering vector
+  double angleDiff = target - origin;
+  if (angleDiff > M_PI) {
+    angleDiff = angleDiff - 2 * M_PI;
+  } else if (angleDiff < -M_PI) {
+    angleDiff = 2 * M_PI + angleDiff;
+  }
+  return angleDiff;
+}
+
+/**
  * Convert bgr to gray image without scaling
  * @param bgr Input image
  * @return Output gray image
@@ -127,6 +150,7 @@ hsv_to_rgb(const cv::Mat &hsv) {
 /**
  * Calculates the common derivatives as 2D CV_32FC2 vector field of a potential field
  * @param potentialField Input potential field
+ * @param getPerpendicularVectorfield Flip the derivation
  * @param ddepth Derivative parameter
  * @param anchor Derivative parameter
  * @param delta Derivative parameter
@@ -135,6 +159,7 @@ hsv_to_rgb(const cv::Mat &hsv) {
  */
 cv::Mat
 potentialfield_to_vectorfield(const cv::Mat &potentialField,
+                              const bool getPerpendicularVectorfield = false,
                               const int ddepth = -1,
                               const cv::Point anchor = cv::Point( -1, -1 ),
                               const double delta = 0,
@@ -160,8 +185,13 @@ potentialfield_to_vectorfield(const cv::Mat &potentialField,
   cv::filter2D(potentialField, vectorFieldY, ddepth, kernelY, anchor, delta, borderType);
 
   // merge
-  cv::Mat vectorFieldChannels[2] = {vectorFieldX, vectorFieldY};
-  cv::merge(vectorFieldChannels,2,vectorField);
+  if (getPerpendicularVectorfield) {
+    cv::Mat vectorFieldChannels[2] = {vectorFieldY, -vectorFieldX};
+    cv::merge(vectorFieldChannels,2,vectorField);
+  } else {
+    cv::Mat vectorFieldChannels[2] = {vectorFieldX, vectorFieldY};
+    cv::merge(vectorFieldChannels,2,vectorField);
+  }
 
   return vectorField;
 }
