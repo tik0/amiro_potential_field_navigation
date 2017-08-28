@@ -54,7 +54,6 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   geometry_msgs::Twist twist;
   twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
   float angleDiff = getAngleDiff(robotAngle, vectorAngle);
-  angleDiff = angleDiff > M_PI ? 2 * M_PI - angleDiff : angleDiff;
   twist.angular.z = angularScale_radPerSecond * angleDiff;
   ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: "<< vectorAbs << ", robotAngle: "<< robotAngle *180/M_PI << ", vectorAngle: " << vectorAngle * 180/M_PI << ", diff: " << angleDiff * 180/M_PI);
   pub.publish(twist);
@@ -66,6 +65,7 @@ void processSynced(const sensor_msgs::ImageConstPtr &image, const nav_msgs::Odom
 }
 
 void processVectorfield(const sensor_msgs::ImageConstPtr& msg) {
+  // TODO Normalize vectorfield (?)
   vectorfield = cv_bridge::toCvCopy(msg, msg->encoding)->image;
   dataArrived = true;
 }

@@ -23,6 +23,8 @@
     <param name="vectorfield_publisher_topic" value="/vectorfield/image"/>
     <param name="heuristic_abs_min" value="0.05"/> <?Undefined An arbitrary value which indecates the start of value decay?>
     <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+    <param name="heuristic_apply" value="1"/> <?Use heuristic instead of native vectorfield?>
+    
   </node>
   <node name="vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>

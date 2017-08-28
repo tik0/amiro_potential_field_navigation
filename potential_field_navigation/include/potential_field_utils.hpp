@@ -5,8 +5,8 @@
 // Description : Helper functions
 // ============================================================================
 
-#ifndef AMIRO_POTENTIAL_FIELD_NAVIGATION_POTENTIAL_FIELD_NAVIGATION_INCLUDE_POTENTIAL_FIELD_UTILS_HPP_
-#define AMIRO_POTENTIAL_FIELD_NAVIGATION_POTENTIAL_FIELD_NAVIGATION_INCLUDE_POTENTIAL_FIELD_UTILS_HPP_
+#ifndef POTENTIAL_FIELD_UTILS_HPP_
+#define POTENTIAL_FIELD_UTILS_HPP_
 
 #include <omp.h>
 #include <opencv2/opencv.hpp>
@@ -224,4 +224,4 @@ cv::Point2i pose2pixel(const geometry_msgs::Pose &pose, const int imageWidth, co
 }
 
 
-#endif /* AMIRO_POTENTIAL_FIELD_NAVIGATION_POTENTIAL_FIELD_NAVIGATION_INCLUDE_POTENTIAL_FIELD_UTILS_HPP_ */
+#endif /* POTENTIAL_FIELD_UTILS_HPP_ */
