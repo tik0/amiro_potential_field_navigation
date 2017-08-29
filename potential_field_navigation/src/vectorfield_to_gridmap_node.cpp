@@ -27,14 +27,14 @@
 using namespace std;
 
 // Ros Topics
-string rosListenerTopic;
-string rosPublisherTopic;
+static std::string rosListenerTopic;
+static std::string rosPublisherTopic;
 
 ros::Publisher gridMapPublisher;
 
 //params
-double meterPerPixel;
-std::string frame_id;
+static double meterPerPixel;
+static std::string frame_id;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat vectorField = cv_bridge::toCvShare(msg, msg->encoding)->image;

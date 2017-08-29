@@ -26,6 +26,9 @@
 using namespace std;
 
 static image_transport::Publisher imagePublisher;
+static int loadAsBlueChannel;
+static int convertToRedChannel;
+static int chargeAsCurrent;
 
 GUI::GUI(QWidget *parent) : QWidget(parent) {
 
@@ -41,17 +44,29 @@ GUI::GUI(QWidget *parent) : QWidget(parent) {
   publish_image->setGeometry(100, 0, button_width, button_height);
   QObject::connect(publish_image, &QPushButton::clicked, this, &GUI::publishImage);
 
-  checkboxLoadAsGray = new QCheckBox("As mono", this);
+  checkboxLoadAsGray = new QCheckBox("as blue ch.", this);
   checkboxLoadAsGray->setGeometry(200, 0, button_width, button_height);
-  checkboxLoadAsGray->setChecked(true);
+  if (loadAsBlueChannel) {
+    checkboxLoadAsGray->setChecked(true);
+  } else {
+    checkboxLoadAsGray->setChecked(false);
+  }
 
-  checkboxInvGray = new QCheckBox("Invert", this);
+  checkboxInvGray = new QCheckBox("to red ch.", this);
   checkboxInvGray->setGeometry(300, 0, button_width, button_height);
-  checkboxInvGray->setChecked(false);
+  if (convertToRedChannel) {
+    checkboxInvGray->setChecked(true);
+  } else {
+    checkboxInvGray->setChecked(false);
+  }
 
-  checkboxSendAsCurrent = new QCheckBox("As current", this);
+  checkboxSendAsCurrent = new QCheckBox("as current", this);
   checkboxSendAsCurrent->setGeometry(400, 0, button_width, button_height);
-  checkboxSendAsCurrent->setChecked(false);
+  if (chargeAsCurrent) {
+    checkboxSendAsCurrent->setChecked(true);
+  } else {
+    checkboxSendAsCurrent->setChecked(false);
+  }
 
   image_label->setBackgroundRole(QPalette::Base);
   image_label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -147,6 +162,9 @@ int main(int argc, char *argv[]) {
   string rosPublisherTopic;
 
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
+  node.param<int>("load_as_blue_channel", loadAsBlueChannel, 1);
+  node.param<int>("convert_to_red_channel", convertToRedChannel, 0);
+  node.param<int>("charge_as_current", chargeAsCurrent, 0);
   ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
 
   image_transport::ImageTransport imageTransport(node);

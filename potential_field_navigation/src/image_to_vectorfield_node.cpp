@@ -29,7 +29,7 @@ string rosListenerTopic;
 string rosPublisherTopicPot, rosPublisherTopicVec;
 
 // ros::Publisher rosPublisher;
-static image_transport::Publisher imagePublisherPot, imagePublisherVec;
+image_transport::Publisher imagePublisherPot, imagePublisherVec;
 static int image_flip_code;
 
 // Heuristic values
@@ -63,29 +63,29 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
 
   // Calculate normalized potential field for the blue channel
   // TODO Differentiate between Charge and Current, because charge as no sqrt in the denominator
-#pragma omp parallel for
   for (auto it = bluePixel.begin(); it < bluePixel.end(); ++it) {
     const uchar value = bgr[0].at<uchar>(it->y, it->x);
+#pragma omp parallel for
     for (int y = 0; y < bgr[0].rows; y++) {
       for (int x= 0; x < bgr[0].cols; x++) {
         if (it->y == y && it->x == x) {
           continue;
         }
-        // We assume a negative (s.t. attracting) charge
+        // We assume a negative (s.t. attracting) charge/current
         potentialField.at<float>(y, x) += - (value / 255.0f) / sqrt(pow(y-it->y,2)+pow(x-it->x,2));
       }
     }
   }
   // Calculate normalized potential field for the red channel
-#pragma omp parallel for
   for (auto it = redPixel.begin(); it < redPixel.end(); ++it) {
     const uchar value = bgr[2].at<uchar>(it->y, it->x);
+#pragma omp parallel for
     for (int y = 0; y < bgr[2].rows; y++) {
       for (int x= 0; x < bgr[2].cols; x++) {
         if (it->y == y && it->x == x) {
           continue;
         }
-        // We assume a negative (s.t. repelling) charge
+        // We assume a negative (s.t. repelling) charge/current
         potentialField.at<float>(y, x) += (value / 255.0f) / sqrt(pow(y-it->y,2)+pow(x-it->x,2));
       }
     }
@@ -94,76 +94,41 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   if (msg->header.frame_id.compare("charge") == 0) {
     ROS_INFO("%s calculate image as charge", ros::this_node::getName().c_str());
     // Get vector field
-    vectorField = potentialfield_to_vectorfield(potentialField);
-
-    // Apply heuristics (S.t. calculate the motor schema)
-    if (heuristic_apply) {
-#pragma omp parallel for
-      for (int idy = 0; idy < vectorField.rows; idy++) {
-        for (int idx = 0; idx < vectorField.cols; idx++) {
-          float &x = vectorField.at<cv::Vec2f>(idy, idx)[0];
-          float &y = vectorField.at<cv::Vec2f>(idy, idx)[1];
-          const float abs = sqrt(x*x + y*y);
-
-          // Remove value if on charge
-          if (bgr[0].at<uchar>(idy, idx) > 0 || bgr[2].at<uchar>(idy, idx) > 0) {
-            x = 0.0;
-            y = 0.0;
-          }
-          // Keep vector which are far away constant
-          else if (abs < heuristic_abs_min) {
-            const float factor = heuristic_factor;
-            x = factor * x / abs;
-            y = factor * y / abs;
-          }
-          // Degenerate vector as closer they are to the charge
-          else { /*(abs < abs_min)*/
-            const float factor = heuristic_factor * heuristic_abs_min / abs;
-            x = factor * x / abs;
-            y = factor * y / abs;
-          }
-        }
-      }
-    }
+    vectorField = potentialfield_to_vectorfield(potentialField, false);
   } else if (msg->header.frame_id.compare("current") == 0) {
     ROS_INFO("%s calculate image as current", ros::this_node::getName().c_str());
     // Get vector field
     vectorField = potentialfield_to_vectorfield(potentialField, true);
-
-    // Apply heuristics (S.t. calculate the motor schema)
-    if (heuristic_apply) {
-#pragma omp parallel for
-      for (int idy = 0; idy < vectorField.rows; idy++) {
-        for (int idx = 0; idx < vectorField.cols; idx++) {
-          float &x = vectorField.at<cv::Vec2f>(idy, idx)[0];
-          float &y = vectorField.at<cv::Vec2f>(idy, idx)[1];
-          const float abs = sqrt(x*x + y*y);
-
-          // Remove value if on charge
-          if (bgr[0].at<uchar>(idy, idx) > 0 || bgr[2].at<uchar>(idy, idx) > 0) {
-            x = 0.0;
-            y = 0.0;
-          }
-          // Keep vector which are far away constant
-          else if (abs < heuristic_abs_min) {
-            const float factor = heuristic_factor;
-            x = factor * x / abs;
-            y = factor * y / abs;
-          }
-          // Degenerate vector as closer they are to the charge
-          else { /*(abs < abs_min)*/
-            const float factor = heuristic_factor * heuristic_abs_min / abs;
-            x = factor * x / abs;
-            y = factor * y / abs;
-          }
-        }
-      }
-    }
   } else {
     ROS_WARN_STREAM(ros::this_node::getName() << " unknown frame_id: " << msg->header.frame_id);
     return;
   }
 
+  // Apply heuristics (S.t. calculate the motor schema)
+  if (heuristic_apply) {
+#pragma omp parallel for
+    for (int idy = 0; idy < vectorField.rows; idy++) {
+      for (int idx = 0; idx < vectorField.cols; idx++) {
+        float &x = vectorField.at<cv::Vec2f>(idy, idx)[0];
+        float &y = vectorField.at<cv::Vec2f>(idy, idx)[1];
+        float abs = cv::norm(vectorField.at<cv::Vec2f>(idy, idx));
+
+        // Remove value if on charge
+        if (bgr[0].at<uchar>(idy, idx) > 0 || bgr[2].at<uchar>(idy, idx) > 0) {
+          x = 0.0;
+          y = 0.0;
+        } else if (abs < heuristic_abs_min) { // Keep vector which are far away constant
+          const float factor = heuristic_factor;
+          x = factor * x / abs;
+          y = factor * y / abs;
+        } else {  // Degenerate vector as closer they are to the charge
+          const float factor = heuristic_factor * heuristic_abs_min / abs;
+          x = factor * x / abs;
+          y = factor * y / abs;
+        }
+      }
+    }
+  }
 
   // Send the data
   cv_bridge::CvImage cvImagePot;
