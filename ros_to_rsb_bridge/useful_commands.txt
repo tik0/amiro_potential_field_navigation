@@ -1,0 +1,12 @@
+ros_int_multiarray_rst_value_array debug for actAmiroLight:
+rostopic pub -r 1 /lights sai_msgs/Int32MultiArrayStamped '{data: {data: [255,0,0,0,255,0,0,0,255,255,127,0,255,255,0,127,0,127,0,127,127,255,255,255,75]}}'
+  rainbow lightring: 50%
+  rostopic pub -r 1 /lights sai_msgs/Int32MultiArrayStamped '{data: {data: [255,0,0,255,127,0,127,127,0,127,255,0,0,255,0,0,127,127,0,0,255,127,0,127,50]}}'
+ros_int_multiarray_rst_value_array debug for actAmiroMotor:
+rostopic pub -r 1 /motor sai_msgs/Int32MultiArrayStamped '{data: {data: [10000,10000]}}'
+motorControl:
+rostopic pub /motor sai_msgs/Int32MultiArrayStamped '{data: {data: [100000,-2000000,1000000]}}'
+setLights:
+rostopic pub /lights sai_msgs/Int32MultiArrayStamped '{data: {data: [5,255,0,0,1000]}}'
+actPoseToTargetPosition:
+rostopic pub /pose geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 1.0, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}'

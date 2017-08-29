@@ -1,0 +1,29 @@
+package twbTracking.proto;
+
+import "vertex.proto";
+
+/**
+ * A polygon is a list of vertices.
+ */
+message Polygon {
+    repeated Translation vertex = 1; 
+} 
+
+/**
+ * Ellipse as 2 lengths.
+ */
+message Ellipse {
+    required Translation center = 1; 
+    /**
+     * Radius in x direction.
+     */
+    required float xradius = 2;
+    /**
+     * Radius in y direction.
+     */
+    required float yradius = 3;
+    /**
+     * Radius in z direction.
+     */
+    optional float zradius = 4;
+}

@@ -1,0 +1,43 @@
+package twbTracking.proto;
+
+import "shapes.proto";
+import "enum.proto";
+import "pose.proto";
+
+message ObjectList {
+  repeated Object object = 1;
+}
+
+/**
+ * Information about position, rotation and shape of an object.
+ */
+ message Object {
+    /**
+     * Object ID
+     */
+    required uint32 id = 1;
+    /**
+     * Object type
+     */
+    required Type type = 2;
+    /**
+     * Confidence value for detected object
+     */
+    optional float confidence = 3;
+    /**
+     * Length Unit
+     */
+    required Unit unit = 4;
+    /**
+     * Position
+     */
+    required Pose position = 5;
+    /**
+     * Optional undistorted vertices of a polygon, in pixels
+     */
+    optional Polygon polygon = 6;
+    /**
+     * Optional undistorted lengths of an ellipse, in pixels
+     */
+    optional Ellipse ellipse = 7;
+}

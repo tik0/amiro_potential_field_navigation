@@ -1,0 +1,19 @@
+package twbTracking.proto;
+
+/**
+  * 3D pose of an object
+  */
+message Translation {
+  /**
+    * x position of the object in the original frame
+    */
+  required float x = 1;
+  /**
+    * y position of the object in the original frame
+    */
+  required float y = 2;
+  /**
+    * z position of the object in the original frame
+    */
+  optional float z = 3;
+}

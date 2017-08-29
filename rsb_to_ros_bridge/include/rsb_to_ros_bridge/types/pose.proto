@@ -1,0 +1,9 @@
+package twbTracking.proto;
+
+import "vertex.proto";
+import "rotation.proto";
+
+message Pose {
+	required Translation translation = 1;
+	required Rotation rotation = 2;
+}

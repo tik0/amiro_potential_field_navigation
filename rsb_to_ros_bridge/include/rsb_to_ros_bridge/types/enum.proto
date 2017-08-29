@@ -1,0 +1,17 @@
+package twbTracking.proto;
+
+/**
+ * Object types. 
+ */
+ enum Type {
+    ArMarker = 0; //ARToolKit Marker
+  }
+
+/**
+ * Unit.
+ */
+ enum Unit {
+ 	Pixel = 0;
+ 	Millimeter = 1;
+ 	Meter = 2;
+ }
