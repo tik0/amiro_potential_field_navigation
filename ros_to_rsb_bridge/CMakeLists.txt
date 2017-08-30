@@ -11,9 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
 )
 
-find_package(RSB 0.16 REQUIRED)
-find_package(RSC 0.16 REQUIRED)
-find_package(RST 0.16 REQUIRED COMPONENTS sandbox)
+find_package(RSB 0.15 REQUIRED)
+find_package(RSC 0.15 REQUIRED)
+find_package(RST 0.15 REQUIRED COMPONENTS sandbox)
 find_package(OpenCV 3.0 REQUIRED)
 
 catkin_package(

@@ -88,5 +88,13 @@ target_link_libraries(vectorfield_to_kinematic_node
   ${catkin_LIBRARIES}
   )
 
+#pixel_odom_to_pseudo_metric_odom_node
+add_executable(pixel_odom_to_pseudo_metric_odom_node
+  src/pixel_odom_to_pseudo_metric_odom_node.cpp)
+
+target_link_libraries(pixel_odom_to_pseudo_metric_odom_node
+  ${catkin_LIBRARIES}
+  )
+
 file(COPY "patter" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 

@@ -27,6 +27,7 @@ static int heuristic_apply;
 static double meterPerPixel;
 static int imageWidth;
 static int imageHeight;
+static bool pixelMode;
 
 // ros::Publisher rosPublisher;
 static image_transport::Publisher imagePublisherPot, imagePublisherVec;
@@ -37,9 +38,13 @@ static int minPoseDiff_pixel = 10;
 
 void process(const nav_msgs::OdometryConstPtr &odom) {
   cv::Mat potentialField(imageHeight, imageWidth, CV_32FC1);
-  // TODO Calculate with respect to correct corrdinate frame
-  // cv::Point2i pose2d((int) (odom->pose.pose.position.x / meterPerPixel + imageWidth/2), (int) (odom->pose.pose.position.y / meterPerPixel + imageHeight/2));
-  cv::Point2i pose2d((int) (imageWidth/2 - odom->pose.pose.position.y / meterPerPixel), (int) (imageHeight/2 - odom->pose.pose.position.x / meterPerPixel));
+  cv::Point2i pose2d;
+  if(pixelMode) {
+    pose2d = cv::Point2i(odom->pose.pose.position.y, odom->pose.pose.position.x);
+  } else {
+//    pose2d = cv::Point2i((int) (odom->pose.pose.position.x / meterPerPixel + imageWidth/2), (int) (odom->pose.pose.position.y / meterPerPixel + imageHeight/2));
+    pose2d = cv::Point2i((int) (imageWidth/2 - odom->pose.pose.position.y / meterPerPixel), (int) (imageHeight/2 - odom->pose.pose.position.x / meterPerPixel));
+  }
 
 
   if (firstRun) {
@@ -116,6 +121,7 @@ int main(int argc, char *argv[]) {
   node.param<int>("image_width", imageWidth, 1000);
   node.param<int>("image_height", imageHeight, 1000);
   node.param<int>("minimum_pose_difference_pixel", minPoseDiff_pixel, 10);
+  node.param<bool>("pixel_mode", pixelMode, false);
   ROS_INFO("[%s] image_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] potentialfield_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopicPot.c_str());
   ROS_INFO("[%s] vectorfield_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopicVec.c_str());
@@ -123,7 +129,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] image_width: %d", ros::this_node::getName().c_str(), imageWidth);
   ROS_INFO("[%s] image_height: %d", ros::this_node::getName().c_str(), imageHeight);
   ROS_INFO("[%s] minimum_pose_difference_pixel: %d", ros::this_node::getName().c_str(), minPoseDiff_pixel);
-
+  ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisherPot = imageTransport.advertise(rosPublisherTopicPot, 1, true);

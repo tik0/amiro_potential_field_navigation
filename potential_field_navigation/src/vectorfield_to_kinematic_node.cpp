@@ -31,10 +31,17 @@ static cv::Mat vectorfield;
 static bool dataArrived = false;
 static float velocityScale_meterPerSecond = 0.1;
 static float angularScale_radPerSecond = 0.1;
+static bool pixelMode;
+static bool twistMode;
 
 void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) {
 
-  cv::Point2i pose2d(pose2pixel(odom->pose.pose, vectorfield.cols, vectorfield.rows, meterPerPixel));
+  cv::Point2i pose2d;
+  if(pixelMode) {
+    pose2d = cv::Point2i((int) odom->pose.pose.position.x, (int) odom->pose.pose.position.y);
+  }else {
+    pose2d = cv::Point2i(pose2pixel(odom->pose.pose, vectorfield.cols, vectorfield.rows, meterPerPixel));
+  }
   if (pose2d.x < 0 || pose2d.x >= vectorfield.cols || pose2d.y < 0 || pose2d.y >= vectorfield.rows) {
     ROS_WARN("[%s] Current AMiRo pose2d %d %d is not in image.", ros::this_node::getName().c_str(), pose2d.x, pose2d.y);
     return;
@@ -50,13 +57,20 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   // Get the robot information
   const double robotAngle = tf::getYaw(odom->pose.pose.orientation);
 
-  // Calculate the steering vector
-  geometry_msgs::Twist twist;
-  twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
-  float angleDiff = getAngleDiff(robotAngle, vectorAngle);
-  twist.angular.z = angularScale_radPerSecond * angleDiff;
-  ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: "<< vectorAbs << ", robotAngle: "<< robotAngle *180/M_PI << ", vectorAngle: " << vectorAngle * 180/M_PI << ", diff: " << angleDiff * 180/M_PI);
-  pub.publish(twist);
+  if(twistMode) {
+    // Calculate the steering vector
+    geometry_msgs::Twist twist;
+    twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
+    float angleDiff = getAngleDiff(robotAngle, vectorAngle);
+    twist.angular.z = angularScale_radPerSecond * angleDiff;
+    ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: " << vectorAbs << ", robotAngle: " << robotAngle * 180 / M_PI << ", vectorAngle: " << vectorAngle * 180 / M_PI << ", diff: " << angleDiff * 180 / M_PI);
+    pub.publish(twist);
+  } else {
+    geometry_msgs::Vector3 vec3;
+    vec3.x = vectorUnit.x;
+    vec3.y = vectorUnit.y;
+    pub.publish(vec3);
+  }
 }
 
 void processSynced(const sensor_msgs::ImageConstPtr &image, const nav_msgs::OdometryConstPtr odom) {
@@ -97,13 +111,22 @@ int main(int argc, char *argv[]) {
   node.param<float>("velocityScale_meterPerSecond", velocityScale_meterPerSecond, 0.1);
   node.param<float>("angularScale_radPerSecond", angularScale_radPerSecond, 0.1);
   node.param<int>("syncTopics", syncTopics, 0);
+  node.param<bool>("pixel_mode", pixelMode, false);
+  node.param<bool>("twist_mode", twistMode, false);
   ROS_INFO("[%s] vectorfield_listener_topic: %s", ros::this_node::getName().c_str(), vectorfield_listener_topic.c_str());
   ROS_INFO("[%s] amiro_odom_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] twist_publisher_topic: %s", ros::this_node::getName().c_str(), twistPublisherTopic.c_str());
   ROS_INFO("[%s] meter_per_pixel: %f", ros::this_node::getName().c_str(), meterPerPixel);
+  ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
+  ROS_INFO("[%s] twist_mode: %i", ros::this_node::getName().c_str(), twistMode);
 
-  // The twist publisher
-  pub = node.advertise<geometry_msgs::Twist>(twistPublisherTopic, 1);
+  if(twistMode) {
+    // The twist publisher
+    pub = node.advertise<geometry_msgs::Twist>(twistPublisherTopic, 1);
+  } else {
+    // The Vector3 publisher
+    pub = node.advertise<geometry_msgs::Vector3>(twistPublisherTopic, 1);
+  }
 
   // The subscriber
   image_transport::ImageTransport imageTransport(node);

@@ -1,8 +1,12 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="use_sim_time" value="true"/>
+  <param name="use_sim_time" value="false"/>
   <arg name="rviz" default="true" />
+  <arg name="cam" default="cam4"/>
+  <arg name="markerId" default="1"/>
+  <arg name="meter_per_pixel" value="0.003"/>
+  <arg name="pixel_mode" value="True"/>
 
   <!--<group if="$(arg rviz)">-->
     <!--<include file="$(find rviz_textured_quads)/launch/map_visualization.xml"/>-->
@@ -10,13 +14,14 @@
   <!--</group>-->
 
 <!--   <node name="rqt_topic" pkg="rqt_topic" type="rqt_topic"/> -->
-<!--   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" output="screen" respawn="true"/> -->
+   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" output="screen" respawn="true"/>
 
   
   <!--Image-->
   <node name="image_selecter_node" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
     <param name="image_publisher_topic" value="/image"/>
   </node>
+
   <node name="image_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
     <param name="image_listener_topic" value="/image"/>
     <param name="potentialfield_publisher_topic" value="/potentialfield/image"/>
@@ -27,16 +32,17 @@
     
   </node>
   <node name="vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
-    <param name="meter_per_pixel" value="0.003"/>
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/image"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/image/gridmap"/>
   </node>
-  
-  
+
+  <node if="$(arg pixel_mode)" name="tf_world_cam" pkg="tf" type="static_transform_publisher" args="1.5 1.5 0 3.14159 0 0 world cam 100"/>
+
   <!--AMiRo 1 Odometry-->
-<!--  <node name="odom1_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
-    <param name="meter_per_pixel" value="0.003"/>
+  <node name="odom1_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <param name="frame_id" value="world"/>
     <param name="amiro_odom_listener_topic" value="/amiro1/odom"/>
     <param name="potentialfield_publisher_topic" value="/potentialfield/amiro1"/>
@@ -44,14 +50,37 @@
     <param name="heuristic_abs_min" value="0.01"/> <?Undefined An arbitrary value which indecates the start of value decay?>
     <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
     <param name="minimum_pose_difference_pixel" value="10.0"/> <?Only recalculate the map if the robot has moved that much?>
+    <param name="pixel_mode" value="$(arg pixel_mode)"/> <?If this is true pixelmode is activated otherwhise normal mode (metric)?>
   </node>
+
   <node name="odom1_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
-    <param name="meter_per_pixel" value="0.003"/>
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/amiro1"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/amiro1/gridmap"/>
-  </node>-->
-  
+    <param name="pixel_mode" value="$(arg pixel_mode)"/> <?If this is true pixelmode is activated otherwhise normal mode (metric)?>
+  </node>
+
+  <node if="$(arg pixel_mode)" name="pixel_odom_to_pseudo_metric_odom_node" pkg="potential_field_navigation" type="pixel_odom_to_pseudo_metric_odom_node" output="screen" cwd="ROS_HOME">
+    <param name="amiro_pixel_odom_listener_topic" value="/tracking/pixel/$(arg markerId)"/>
+    <param name="amiro_pseudo_metric_odom_publisher_topic" value="/amiro1/odom/pseudo_metric"/>
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+    <param name="frame_id" value="cam"/>
+  </node>
+
+  <node if="$(arg pixel_mode)" name="rsb_twb_to_ros_navmsgs_odometry$(arg markerId)" pkg="rsb_to_ros_bridge" type="rsb_twb_to_ros_navmsgs_odometry" output="screen" cwd="ROS_HOME">
+    <param name="rsb_listener_scope" value="/tracking/pixel/$(arg cam)/"/>
+    <param name="ros_publish_topic" value="/tracking/pixel/$(arg markerId)"/>
+    <param name="marker_id" value="$(arg markerId)"/>
+    <param name="rostimenow" value="0"/>
+  </node>
+
+  <node name="AMiRo1" pkg="ros_to_rsb_bridge" type="ros_geometry_msgs_twist_to_rst_value_array" output="screen" cwd="ROS_HOME">
+    <param name="ros_listener_topic" value="/amiro1/cmd_vel"/>
+    <param name="rsb_publish_scope" value="/amiro1/motor/5"/>
+  </node>
+
+
   <!--AMiRo 2 Odometry-->
 <!--  <node name="odom2_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="0.003"/>
@@ -93,8 +122,12 @@
     <param name="meter_per_pixel" value="0.003"/>
     <param name="frame_id" value="world"/>
     <param name="vectorfield_listener_topic" value="/vectorfield/image"/>
-    <param name="amiro_odom_listener_topic" value="/amiro1/odom"/>
+    <param name="amiro_odom_listener_topic" value="/amiro1/odom" unless="$(arg pixel_mode)"/>
+    <param name="amiro_odom_listener_topic" value="/tracking/pixel/$(arg markerId)" if="$(arg pixel_mode)" />
+    <param name="twist_publisher_topic" value="/amiro1/cmd_vel"/>
     <param name="velocityScale_meterPerSecond" value="0.1"/>
     <param name="angularScale_radPerSecond" value="0.5"/>
+    <param name="pixel_mode" value="$(arg pixel_mode)"/>
+    <param name="twist_mode" value="True"/>
   </node>
 </launch>
