@@ -6,6 +6,7 @@
   <arg name="cam" default="cam4"/>
   <arg name="meter_per_pixel" value="0.003"/>
   <arg name="pixel_mode" value="True"/>
+  <arg name="rate" value="10"/>
 
   <arg name="markerId" default="1"/>
   <arg name="markerId2" default="20"/>
@@ -131,17 +132,20 @@
       <param name="field1_listener_topic" value="/vectorfield/amiro1"/>
       <param name="field2_listener_topic" value="/vectorfield/amiro2"/>
       <param name="vectorfield_publisher_topic" value="/vectorfield/amiro1_amiro2/fused"/>
+      <param name="rate" value="$(arg rate)"/>
     </node>
     <node name="vectorfield_merger_node" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
       <param name="field1_listener_topic" value="/vectorfield/amiro1_amiro2/fused"/>
       <param name="field2_listener_topic" value="/vectorfield/image"/>
       <param name="vectorfield_publisher_topic" value="/vectorfield/fused"/>
+      <param name="rate" value="$(arg rate)"/>
     </node>
     <node name="fusion_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
       <param name="meter_per_pixel" value="0.003"/>
       <param name="frame_id" value="world"/>
       <param name="vectorfield_listener_topic" value="/vectorfield/fused"/>
       <param name="gridmap_publisher_topic" value="/vectorfield/fused/gridmap"/>
+      <param name="rate" value="$(arg rate)"/>
     </node>
 
   <!--Steering for Amiro1-->
