@@ -67,16 +67,12 @@ int main(int argc, char * argv[]) {
   ros::init(argc, argv, programName);
   ros::NodeHandle node("~");
 
-  int frequency;
-
   node.param<string>("ros_listener_topic", rosListenerTopic, "/teleop_velocity_smoother/raw_cmd_vel");
   node.param<string>("rsb_publish_scope", rsbPublishScope, "/motor/5");
-  node.param<int>("duration_frequency", frequency, 10);
+  node.param<int>("duration", durationTime, 0); // [us]
   ROS_INFO("rsb_publish_scope: %s", rsbPublishScope.c_str());
   ROS_INFO("ros_listener_topic: %s", rosListenerTopic.c_str());
-  ROS_INFO("frequency: %d", frequency);
-
-  durationTime = 1.0/frequency * 1e6;
+  ROS_INFO("duration: %d", durationTime);
 
   boost::shared_ptr<rsb::converter::ProtocolBufferConverter<rst::generic::Value> >
   converter(new rsb::converter::ProtocolBufferConverter<rst::generic::Value>());

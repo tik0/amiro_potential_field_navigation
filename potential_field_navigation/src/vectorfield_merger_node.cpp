@@ -20,6 +20,7 @@
 // OpenCV
 #include <opencv2/highgui/highgui.hpp>
 
+#include "potential_field_utils.hpp"
 
 using namespace std;
 
@@ -28,22 +29,21 @@ using namespace std;
 static image_transport::Publisher imagePublisher;
 
 // cv::Mat should be thread safe
-const std::size_t numFields = 2;
-static std::vector<cv::Mat> fields(numFields);
-static std::vector<bool> dataArrived(numFields,false);
+cv::Mat field1, field2;
+static bool dataArrived1, dataArrived2;
+static int normalize;
+static float rate;
 
 void process1(const sensor_msgs::ImageConstPtr& msg) {
-  const std::size_t id = 0;
-  dataArrived.at(id) = true;
-  cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
-  ROS_DEBUG_STREAM("process2, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
+  dataArrived1 = true;
+  cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(field1);
+  ROS_DEBUG_STREAM("process2, size (x,y): " << field1.cols << " "  << field1.rows);
 }
 
 void process2(const sensor_msgs::ImageConstPtr& msg) {
-  const std::size_t id = 1;
-  dataArrived.at(id) = true;
-  cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(fields.at(id));
-  ROS_DEBUG_STREAM("process1, size (x,y): " << fields.at(id).cols << " "  << fields.at(id).rows);
+  dataArrived2 = true;
+  cv_bridge::toCvShare(msg, msg->encoding)->image.copyTo(field2);
+  ROS_DEBUG_STREAM("process1, size (x,y): " << field2.cols << " "  << field2.rows);
 }
 
 int main(int argc, char *argv[]) {
@@ -60,16 +60,19 @@ int main(int argc, char *argv[]) {
   node.param<string>("vectorfield_publisher_topic", vectorfieldPublisherTopic, "/vectorfield/fused");
   node.param<int>("field_width", fieldWidth, 1000);
   node.param<int>("field_height", fieldHeight, 1000);
+  node.param<int>("normalize", normalize, 0);
+  node.param<float>("rate", rate, 1);
 
-  {
-    cv::Mat dummy = cv::Mat(cv::Size(fieldWidth,fieldHeight), CV_32FC2);
-    for (auto it = fields.begin(); it < fields.end(); ++it) {
-      dummy.copyTo(*it);
-    }
-  }
+  // Initialize
   cv_bridge::CvImage cvImage;
   cvImage.encoding = sensor_msgs::image_encodings::TYPE_32FC2;
-  cv::Mat vectorfield_merged = cv::Mat(cv::Size(fieldWidth,fieldHeight), CV_32FC2);
+  cv::Mat vectorfield_merged;
+  {
+    cv::Mat dummy = cv::Mat(cv::Size(fieldWidth,fieldHeight), CV_32FC2, cv::Scalar(0.0f));
+    dummy.copyTo(field1);
+    dummy.copyTo(field2);
+    dummy.copyTo(vectorfield_merged);
+  }
 
   image_transport::ImageTransport fusedTransport(node);
   image_transport::ImageTransport field1Transport(node);
@@ -79,21 +82,25 @@ int main(int argc, char *argv[]) {
   image_transport::Subscriber field2_sub = field2Transport.subscribe(vectorfield2ListenerTopic, 1, &process2);
 
   bool burnIn = true;
-  ros::Rate rate(1);
+  ros::Rate r(rate);
   while(ros::ok()) {
     ros::spinOnce();
     if (!burnIn) {
-      if (dataArrived.at(0) || dataArrived.at(1)) {
-        dataArrived.at(0) = false;
-        dataArrived.at(1) = false;
+      if (dataArrived1 || dataArrived2) {
+        dataArrived1 = false;
+        dataArrived2 = false;
         ROS_INFO_STREAM(ros::this_node::getName() << " STATE: Do fusion");
         // Fuse
-        if (fields.at(0).cols != fieldWidth || fields.at(0).rows != fieldHeight ||
-            fields.at(1).cols != fieldWidth || fields.at(1).rows != fieldHeight) {
+        if (field1.cols != fieldWidth || field1.rows != fieldHeight ||
+            field2.cols != fieldWidth || field2.rows != fieldHeight) {
           ROS_WARN_STREAM(ros::this_node::getName() << " insufficient field size");
           continue;
         }
-        vectorfield_merged = fields.at(0) + fields.at(1);
+        vectorfield_merged = field1 + field2;
+        // Normalize to the greatest vector
+        if (normalize) {
+          calc_normalized_field(vectorfield_merged);
+        }
         // Publish
         cvImage.image = vectorfield_merged;
         imagePublisher.publish(cvImage.toImageMsg());
@@ -102,11 +109,11 @@ int main(int argc, char *argv[]) {
       }
     } else {
       ROS_INFO_STREAM(ros::this_node::getName() << " STATE: Burn in");
-      if (dataArrived.at(0) && dataArrived.at(1)) {
+      if (dataArrived1 && dataArrived2) {
         burnIn = false;
       }
     }
-    rate.sleep();
+    r.sleep();
   }
   return 0;
 }

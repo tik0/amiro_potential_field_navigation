@@ -73,8 +73,9 @@ void processTwbTrackingProtoObjectList(rsb::EventPtr event) {
 
   for (int i = 0; i < objectList->object_size(); i++) {
     twbTracking::proto::Object obj = objectList->object(i);
+//    ROS_INFO("[%s] markerid: %i", ros::this_node::getName().c_str(), obj.id());
     if (obj.id() != markerId) {
-      return;
+      continue;
     }
     double rotEuler[3] = { obj.position().rotation().x() / 180.0 * M_PI, obj.position().rotation().y() / 180.0 * M_PI, - /* Angle in twb wrong way */obj.position().rotation().z() / 180.0 * M_PI };
     double rotQuat[4];
@@ -112,13 +113,13 @@ int main(int argc, char * argv[]) {
   ros::NodeHandle node("~");
 
   node.param<string>("rsb_listener_scope", rsbListenerScope, "/tracking/merger");
-  ROS_INFO("rsb_listener_scope: %s", rsbListenerScope.c_str());
   node.param<string>("ros_publish_topic", rosPublishPoseStamped, "/tracking/0");
-  ROS_INFO("ros_publish_topic: %s", rosPublishPoseStamped.c_str());
   node.param<bool>("rostimenow", rostimenow, false);
-  ROS_INFO("rostimenow: %s", rostimenow ? "True" : "False");
   node.param<int>("marker_id", markerId, 0);
-  ROS_INFO("marker_id: %d", markerId);
+  ROS_INFO("[%s] rsb_listener_scope: %s", ros::this_node::getName().c_str(), rsbListenerScope.c_str());
+  ROS_INFO("[%s] ros_publish_topic: %s", ros::this_node::getName().c_str(), rosPublishPoseStamped.c_str());
+  ROS_INFO("[%s] rostimenow: %s", ros::this_node::getName().c_str(), rostimenow ? "True" : "False");
+  ROS_INFO("[%s] marker_id: %d", ros::this_node::getName().c_str(), markerId);
 
   rosPosePub = node.advertise<nav_msgs::Odometry>(rosPublishPoseStamped, 1);
 

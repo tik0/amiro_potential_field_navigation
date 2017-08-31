@@ -5,7 +5,6 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /PotentialField_Image1
         - /Amiro1_odom1/Shape1
         - /Amiro2_odom1/Shape1
         - /Amiro2_odom_pseudometric1/Shape1
@@ -29,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: PotentialField_Image
 Visualization Manager:
   Class: ""
   Displays:
@@ -123,7 +122,7 @@ Visualization Manager:
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: false
+      Enabled: true
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -137,7 +136,7 @@ Visualization Manager:
       Topic: /vectorfield/image/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: false
+      Value: true
     - Angle Tolerance: 0.100000001
       Class: rviz/Odometry
       Covariance:
