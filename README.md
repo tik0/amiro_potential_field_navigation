@@ -25,7 +25,7 @@ export CMAKE_PREFIX_PATH=$F:${CMAKE_PREFIX_PATH}
 * then we need to create a catkin workspace:
 * ```source /opt/ros/kinetic/setup.bash && cd && mkdir -p catkin_ws/src && cd catkin_ws/src && catkin_init_workspace```
 * then we need to clone the repository:
-```cd src && git clone https://github.com/tik0/amiro_potential_field_navigation```
+```git clone https://github.com/tik0/amiro_potential_field_navigation```
 * then we have to clone the submodules:
 ```cd amiro_potential_field_navigation && git submodule update --init --recursive```
 
@@ -33,7 +33,7 @@ export CMAKE_PREFIX_PATH=$F:${CMAKE_PREFIX_PATH}
 * open a terminal
 * source ros enviroments: ```source /opt/ros/kinetic/setup.bash```
 * go into your catkin_ws: ```cd ~/catkin_ws```
-* to build the files we need catkin: ```catkin_make```
+* to build the files we need catkin: ```catkin_make -DCMAKE_BUILD_TYPE=Release```
 * after this there will be a ```build``` and a ```devel``` folder. Instead of sourcing the ros enviroment you can source a setup.bash in your devel folder in the catkin_ws like: ```source devel/setup.bash```
 
 ### Start
