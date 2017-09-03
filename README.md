@@ -28,6 +28,8 @@ export CMAKE_PREFIX_PATH=$F:${CMAKE_PREFIX_PATH}
 ```git clone https://github.com/tik0/amiro_potential_field_navigation```
 * then we have to clone the submodules:
 ```cd amiro_potential_field_navigation && git submodule update --init --recursive```
+* For easier tool flow, we link the pattern folder to the ROS home:
+```ln -fs ~/catkin_ws/src/amiro_potential_field_navigation/potential_field_navigation/patter/ ~/.ros/pattern```
 
 ### Build
 * open a terminal
