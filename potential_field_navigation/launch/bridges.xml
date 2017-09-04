@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-  <param name="use_sim_time" value="false"/>
   <arg name="markerId" default="1"/>
-  <arg name="meter_per_pixel" value="0.003"/>
-  <arg name="pixel_mode" value="True"/>
+  <arg name="meter_per_pixel" default="0.003"/>
+  <arg name="pixel_mode" default="True"/>
+  <arg name="cam" default="cam4"/>
 
   <node if="$(arg pixel_mode)" name="pixel_odom_to_pseudo_metric_odom_node$(arg markerId)" pkg="potential_field_navigation" type="pixel_odom_to_pseudo_metric_odom_node" output="screen" cwd="ROS_HOME">
     <param name="amiro_pixel_odom_listener_topic" value="/tracking/pixel/$(arg markerId)"/>

@@ -50,25 +50,23 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   // IMPORTANT: We assume the orientation of the robot resides in the world frame
   // Get the vector in the vectorfield at robot position
   cv::Point2f vector(vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[0], vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[1]);
-  const float vectorAbs = sqrt(vector.dot(vector));
-  cv::Point2f vectorUnit(vector.x / vectorAbs, vector.y / vectorAbs);
+  const float vectorAbs = cv::norm(vector);
   const double vectorAngle = atan2(vector.x, vector.y);
-
   // Get the robot information
   const double robotAngle = tf::getYaw(odom->pose.pose.orientation);
+  const float angleDiff = getAngleDiff(robotAngle, vectorAngle);
 
   if(twistMode) {
     // Calculate the steering vector
     geometry_msgs::Twist twist;
     twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
-    float angleDiff = getAngleDiff(robotAngle, vectorAngle);
     twist.angular.z = angularScale_radPerSecond * angleDiff;
     ROS_DEBUG_STREAM(ros::this_node::getName() << " VectorAbs: " << vectorAbs << ", robotAngle: " << robotAngle * 180 / M_PI << ", vectorAngle: " << vectorAngle * 180 / M_PI << ", diff: " << angleDiff * 180 / M_PI);
     pub.publish(twist);
   } else {
     geometry_msgs::Vector3 vec3;
-    vec3.x = vectorUnit.x;
-    vec3.y = vectorUnit.y;
+    vec3.x = cos(angleDiff + M_PI/2) * vectorAbs;
+    vec3.y = sin(angleDiff + M_PI/2) * vectorAbs;
     pub.publish(vec3);
   }
 }

@@ -3,8 +3,8 @@
 
   <param name="use_sim_time" value="false"/>
   <arg name="rviz" default="true" />
-  <arg name="cam" default="cam1"/>
-  <arg name="markerId" default="1"/>
+  <arg name="cam" default="cam2"/>
+  <arg name="markerId" default="2"/>
   <arg name="meter_per_pixel" value="0.003"/>
   <arg name="pixel_mode" value="True"/>
 
