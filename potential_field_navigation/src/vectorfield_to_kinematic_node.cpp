@@ -101,12 +101,13 @@ int main(int argc, char *argv[]) {
   ros::init(argc, argv, ros::this_node::getName());
   ros::NodeHandle node("~");
 
-  string twistPublisherTopic;
+  string twistPublisherTopic, vectorPublisherTopic;
   string vectorfield_listener_topic;
   string amiroOdomListenerTopic;
   node.param<string>("vectorfield_listener_topic", vectorfield_listener_topic, "/image/vectorfield");
   node.param<string>("amiro_odom_listener_topic", amiroOdomListenerTopic, "/amiro1/odom");
   node.param<string>("twist_publisher_topic", twistPublisherTopic, "/amiro1/cmd_vel");
+  node.param<string>("vector_publisher_topic", vectorPublisherTopic, "/amiro1/vector");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
   node.param<float>("velocityScale_meterPerSecond", velocityScale_meterPerSecond, 0.1);
   node.param<float>("angularScale_radPerSecond", angularScale_radPerSecond, 0.1);
@@ -116,6 +117,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] vectorfield_listener_topic: %s", ros::this_node::getName().c_str(), vectorfield_listener_topic.c_str());
   ROS_INFO("[%s] amiro_odom_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] twist_publisher_topic: %s", ros::this_node::getName().c_str(), twistPublisherTopic.c_str());
+  ROS_INFO("[%s] vector_publisher_topic: %s", ros::this_node::getName().c_str(), vectorPublisherTopic.c_str());
   ROS_INFO("[%s] meter_per_pixel: %f", ros::this_node::getName().c_str(), meterPerPixel);
   ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
   ROS_INFO("[%s] twist_mode: %i", ros::this_node::getName().c_str(), twistMode);
@@ -125,7 +127,7 @@ int main(int argc, char *argv[]) {
     pub = node.advertise<geometry_msgs::Twist>(twistPublisherTopic, 1);
   } else {
     // The Vector3 publisher
-    pub = node.advertise<geometry_msgs::Vector3>(twistPublisherTopic, 1);
+    pub = node.advertise<geometry_msgs::Vector3>(vectorPublisherTopic, 1);
   }
 
   // The subscriber

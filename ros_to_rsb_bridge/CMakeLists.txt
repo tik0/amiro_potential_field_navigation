@@ -67,5 +67,17 @@ target_link_libraries(ros_geometry_msgs_twist_to_rst_value_array
   ${RSTSANDBOX_LIBRARIES}
 )
 
+
+add_executable(ros_geometry_msgs_Vector3_to_rst_math_Vec2DFloat
+  src/ros_geometry_msgs_Vector3_to_rst_math_Vec2DFloat.cpp
+)
+
+target_link_libraries(ros_geometry_msgs_Vector3_to_rst_math_Vec2DFloat
+  ${catkin_LIBRARIES}
+  ${RSB_LIBRARIES}
+  ${RST_LIBRARIES}
+  ${RSTSANDBOX_LIBRARIES}
+)
+
 ADD_DEFINITIONS(${RST_CFLAGS} ${RSTSANDBOX_CFLAGS})
 add_dependencies(ros_int_multiarray_rst_value_array sai_msgs_gencpp)
