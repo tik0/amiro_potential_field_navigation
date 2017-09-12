@@ -30,7 +30,7 @@ static int loadAsBlueChannel;
 static int convertToRedChannel;
 static int chargeAsCurrent;
 
-GUI::GUI(QWidget *parent) : QWidget(parent) {
+GUI::GUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&GUI::spin, this) {
 
   image_label = new QLabel(this);
   image_label->setGeometry(200, 0, 100, 100);
@@ -86,6 +86,22 @@ GUI::~GUI() {
   delete publish_image;
   delete image_selecter;
   delete image_label;
+
+  shutdown_required = true;
+  thread.join();
+}
+
+void GUI::spin() {
+  ros::Rate loop(10);
+  cout << "debug 1" << endl;
+  while (ros::ok()) {
+    cout << "debug 2" << endl;
+    ros::spinOnce();
+    loop.sleep();
+  }
+  ROS_INFO("[%s] Shutdown this node.", ros::this_node::getName().c_str());
+  ros::shutdown();
+  QApplication::quit();
 }
 
 void GUI::selectImage() {
@@ -100,7 +116,7 @@ void GUI::selectImage() {
 
   // Invert the color channel if necessary
   if (cv_image.channels() == 1) {
-    ROS_INFO_STREAM( ros::this_node::getName() << " loaded gray scale image");
+    ROS_INFO_STREAM(ros::this_node::getName() << " loaded gray scale image");
     std::vector<cv::Mat> array_to_merge(3);
     cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
     if (checkboxInvGray->checkState() == Qt::CheckState::Checked) {
@@ -115,9 +131,9 @@ void GUI::selectImage() {
     }
     cv::merge(array_to_merge, cv_image);
   } else if (cv_image.channels() == 3) {
-    ROS_INFO_STREAM( ros::this_node::getName() << " loaded BGR image");
+    ROS_INFO_STREAM(ros::this_node::getName() << " loaded BGR image");
   } else {
-    ROS_ERROR_STREAM( ros::this_node::getName() << " Unsupported number of channels");
+    ROS_ERROR_STREAM(ros::this_node::getName() << " Unsupported number of channels");
     return;
   }
 
@@ -171,10 +187,9 @@ int main(int argc, char *argv[]) {
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
 
   QApplication app(argc, argv);
-
   GUI gui;
   gui.show();
-
+  app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 
   return app.exec();
 }

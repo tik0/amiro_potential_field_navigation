@@ -6,6 +6,7 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(OpenMP REQUIRED)
 find_package(Qt5Widgets REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread)
 find_package(catkin REQUIRED COMPONENTS
   amiro_description
   amiro_gazebo
@@ -62,6 +63,7 @@ add_executable(image_selecter_node
 target_link_libraries(image_selecter_node
   ${catkin_LIBRARIES}
   Qt5::Widgets
+  ${Boost_LIBRARIES}
   )
 
 #odom_to_vectorfield_node

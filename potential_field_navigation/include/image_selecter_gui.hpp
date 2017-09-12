@@ -7,6 +7,13 @@
 #include <QLabel>
 #include <QCheckBox>
 
+#include <boost/thread.hpp>
+
+/*
+ * ROS QT Implementation after this tutorial:
+ *
+ */
+
 #ifndef _IMAGE_SELECTER_GUI_HPP_
 #define _IMAGE_SELECTER_GUI_HPP_
 
@@ -16,6 +23,7 @@ class GUI : public QWidget {
 
 public:
   explicit GUI(QWidget *parent = 0);
+
   ~GUI();
 
 public:
@@ -39,7 +47,12 @@ public:
     return QImage((const unsigned char *) (mat.data), mat.cols, mat.rows, format);
   }
 
+  void spin();
+
 private:
+
+  bool shutdown_required;
+  boost::thread thread;
 
 //  QPushButton *image_select;
   QPushButton *publish_image;
