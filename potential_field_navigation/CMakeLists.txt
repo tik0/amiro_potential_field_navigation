@@ -98,5 +98,15 @@ target_link_libraries(pixel_odom_to_pseudo_metric_odom_node
   ${catkin_LIBRARIES}
   )
 
+#image_viewer_node
+add_executable(image_viewer_node
+  src/image_viewer_node.cpp)
+
+target_link_libraries(image_viewer_node
+  ${catkin_LIBRARIES}
+  Qt5::Widgets
+  ${Boost_LIBRARIES}
+  )
+
 file(COPY "patter" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
 

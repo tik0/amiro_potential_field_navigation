@@ -30,7 +30,7 @@ static int loadAsBlueChannel;
 static int convertToRedChannel;
 static int chargeAsCurrent;
 
-GUI::GUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&GUI::spin, this) {
+ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&ImageSelecterGUI::spin, this) {
 
   image_label = new QLabel(this);
   image_label->setGeometry(200, 0, 100, 100);
@@ -38,11 +38,11 @@ GUI::GUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&G
 
   image_selecter = new QPushButton("select image", this);
   image_selecter->setGeometry(0, 0, button_width, button_height);
-  QObject::connect(image_selecter, &QPushButton::clicked, this, &GUI::selectImage);
+  QObject::connect(image_selecter, &QPushButton::clicked, this, &ImageSelecterGUI::selectImage);
 
   publish_image = new QPushButton("publish image", this);
   publish_image->setGeometry(100, 0, button_width, button_height);
-  QObject::connect(publish_image, &QPushButton::clicked, this, &GUI::publishImage);
+  QObject::connect(publish_image, &QPushButton::clicked, this, &ImageSelecterGUI::publishImage);
 
   checkboxLoadAsGray = new QCheckBox("as blue ch.", this);
   checkboxLoadAsGray->setGeometry(200, 0, button_width, button_height);
@@ -78,7 +78,7 @@ GUI::GUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&G
   label = new QLabel(this);
 }
 
-GUI::~GUI() {
+ImageSelecterGUI::~ImageSelecterGUI() {
   delete label;
   delete checkboxSendAsCurrent;
   delete checkboxLoadAsGray;
@@ -91,7 +91,7 @@ GUI::~GUI() {
   thread.join();
 }
 
-void GUI::spin() {
+void ImageSelecterGUI::spin() {
   ros::Rate loop(10);
   cout << "debug 1" << endl;
   while (ros::ok()) {
@@ -104,7 +104,7 @@ void GUI::spin() {
   QApplication::quit();
 }
 
-void GUI::selectImage() {
+void ImageSelecterGUI::selectImage() {
   QString fileName = QFileDialog::getOpenFileName(this, QString::fromStdString("Open image"), QString::fromStdString("../patter/"), QString::fromStdString("Image Files (*.png *.jpg *.jpeg *.bmp)"));
 
   // Check if loading as grayscale
@@ -150,7 +150,7 @@ void GUI::selectImage() {
   imageSelected = true;
 }
 
-void GUI::publishImage() {
+void ImageSelecterGUI::publishImage() {
   if (!imageSelected) {
     ROS_WARN("[%s] Please selected an image first.", ros::this_node::getName().c_str());
     return;
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
   imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
 
   QApplication app(argc, argv);
-  GUI gui;
+  ImageSelecterGUI gui;
   gui.show();
   app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
 

@@ -17,14 +17,14 @@
 #ifndef _IMAGE_SELECTER_GUI_HPP_
 #define _IMAGE_SELECTER_GUI_HPP_
 
-class GUI : public QWidget {
+class ImageSelecterGUI : public QWidget {
 
 //Q_OBJECT
 
 public:
-  explicit GUI(QWidget *parent = 0);
+  explicit ImageSelecterGUI(QWidget *parent = 0);
 
-  ~GUI();
+  ~ImageSelecterGUI();
 
 public:
 
