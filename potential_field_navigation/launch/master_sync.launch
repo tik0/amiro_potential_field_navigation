@@ -1,0 +1,11 @@
+<launch>
+
+  <node name="master_discovery" pkg="master_discovery_fkie" type="master_discovery">
+    <rosparam param="robot_hosts">['alpia']</rosparam>
+  </node>
+
+  <node name="master_sync" pkg="master_sync_fkie" type="master_sync">
+    <rosparam param="sync_topics">['/shm_to_ros_node*']</rosparam>
+  </node>
+
+</launch>
