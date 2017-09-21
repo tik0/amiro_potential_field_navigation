@@ -7,3 +7,6 @@
 [submodule "grid_map"]
 	path = grid_map
 	url = https://github.com/ethz-asl/grid_map.git
+[submodule "multimaster_fkie"]
+	path = multimaster_fkie
+	url = https://github.com/fkie/multimaster_fkie.git
