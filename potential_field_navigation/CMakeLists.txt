@@ -39,6 +39,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-deprecated-declarations -O3 -Wn
 include_directories(
   ${catkin_INCLUDE_DIRS}
   include/
+  ${QT_USE_FILE}
 )
 #image_to_vectorfield_node
 add_executable(image_to_vectorfield_node
@@ -103,8 +104,8 @@ add_executable(image_viewer_node
   src/image_viewer_node.cpp)
 
 target_link_libraries(image_viewer_node
-  ${catkin_LIBRARIES}
   Qt5::Widgets
+  ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
   )
 
