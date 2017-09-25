@@ -15,6 +15,11 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSlider>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QSizePolicy>
+#include <QStackedLayout>
 
 #include <boost/thread.hpp>
 
@@ -53,11 +58,25 @@ private:
 
   void clickedLoadImageButton2();
 
+  void updateImages();
+
 private:
+
+  cv::Mat image1;
+  cv::Mat image2;
+  bool image1Loaded = false;
+  bool image2Loaded = false;
 
   bool shutdown_required;
   boost::thread thread;
 
+  QGroupBox * groupBox0;
+  QGroupBox *groupBox1;
+  QGroupBox *groupBox2;
+  QGridLayout *gridLayout1;
+  QVBoxLayout *qvBox1;
+  QHBoxLayout *qhBox1;
+  QHBoxLayout *qhBox2;
   QLineEdit *textBox1;
   QLineEdit *textBox2;
   QPushButton *loadImageButton1;
@@ -69,7 +88,7 @@ private:
   QLabel *transparencySliderLabelInfo1;
   QLabel *transparencySliderLabelInfo2;
   QLabel *imageLabel1;
-  QLabel *imageLabel2;
+//  QLabel *imageLabel2;
 };
 
 #endif //_IMAGE_VIEWER_GUI_HPP_
