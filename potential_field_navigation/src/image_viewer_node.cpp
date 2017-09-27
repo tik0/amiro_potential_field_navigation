@@ -60,7 +60,10 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
 
   // 1st Row
   groupBox1 = new QGroupBox(this);
-  groupBox1->setTitle("groupBox1");
+  groupBox1->setTitle("Image 1 Parameter");
+
+  scopeLabel1 = new QLabel(this);
+  scopeLabel1->setText("Topic:");
 
   textBox1 = new QLineEdit(this);
   textBox1->setText(QString::fromStdString(defaultSubTopic1));
@@ -88,6 +91,7 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
   transparencySliderLabelInfo1->setText(QString::number(transparencySlider1->value()));
 
   qhBox1 = new QHBoxLayout;
+  qhBox1->addWidget(scopeLabel1);
   qhBox1->addWidget(textBox1);
   qhBox1->addWidget(loadImageButton1);
   qhBox1->addWidget(radioButton1);
@@ -98,7 +102,10 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
 
   // 2nd Row
   groupBox2 = new QGroupBox(this);
-  groupBox2->setTitle("groupBox2");
+  groupBox2->setTitle("Image 2 Parameter");
+
+  scopeLabel2 = new QLabel(this);
+  scopeLabel2->setText("Topic:");
 
   textBox2 = new QLineEdit(this);
   textBox2->setText(QString::fromStdString(defaultSubTopic2));
@@ -126,6 +133,7 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
   transparencySliderLabelInfo2->setText(QString::number(transparencySlider2->value()));
 
   qhBox2 = new QHBoxLayout;
+  qhBox2->addWidget(scopeLabel2);
   qhBox2->addWidget(textBox2);
   qhBox2->addWidget(loadImageButton2);
   qhBox2->addWidget(radioButton2);
@@ -139,24 +147,20 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
   qvBox1->addWidget(groupBox1);
   qvBox1->addWidget(groupBox2);
   groupBox0 = new QGroupBox(this);
-  groupBox0->setTitle("groupBox0");
+  groupBox0->setTitle("Parameter");
   groupBox0->setLayout(qvBox1);
-  QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-  groupBox0->setSizePolicy(sizePolicy);
+  groupBox0->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
 //   Image Labels
   imageLabel1 = new QLabel(this);
   imageLabel1->setText(QString::fromStdString("image label1"));
 
-//  imageLabel2 = new QLabel(this);
-//  imageLabel2->setText(QString::fromStdString("image label2"));
 
   // Total Gui
   this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
   gridLayout1 = new QGridLayout();
   gridLayout1->addWidget(groupBox0, 0, 0);
   gridLayout1->addWidget(imageLabel1, 1, 0);
-//  gridLayout1->addWidget(imageLabel2, 1, 0);
   this->setLayout(gridLayout1);
 
   image1once = true;
@@ -175,6 +179,8 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
 ImageViewGUI::~ImageViewGUI() {
   delete textBox1;
   delete textBox2;
+  delete scopeLabel1;
+  delete scopeLabel2;
   delete loadImageButton1;
   delete loadImageButton2;
   delete radioButton1;
@@ -193,7 +199,6 @@ ImageViewGUI::~ImageViewGUI() {
   delete qhBox1;
   delete qhBox2;
   delete imageLabel1;
-//  delete imageLabel2;
 
   shutdown_required = true;
   thread.join();

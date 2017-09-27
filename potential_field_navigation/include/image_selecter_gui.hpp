@@ -6,6 +6,9 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QCheckBox>
+#include <QHBoxLayout>
+#include <QGroupBox>
+#include <QGridLayout>
 
 #include <boost/thread.hpp>
 
@@ -54,17 +57,18 @@ private:
   bool shutdown_required;
   boost::thread thread;
 
-//  QPushButton *image_select;
-  QPushButton *publish_image;
-  QLabel *image_label;
-  QPushButton *image_selecter;
   cv::Mat cv_image;
   QImage qt_image;
-  QLabel *label;
+
+  QGroupBox *groupBox1;
+  QHBoxLayout *qhBox1;
+  QGridLayout *gridLayout1;
+  QPushButton *publish_image;
+  QPushButton *image_selecter;
+  QLabel *image_label;
   QCheckBox *checkboxLoadAsGray;
   QCheckBox *checkboxInvGray;
   QCheckBox *checkboxSendAsCurrent;
-  bool imageSelected = false;
 
 };
 

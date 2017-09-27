@@ -19,10 +19,6 @@
 
 #include "image_selecter_gui.hpp"
 
-
-#define button_height 30
-#define button_width 100
-
 using namespace std;
 
 static image_transport::Publisher imagePublisher;
@@ -33,27 +29,23 @@ static int chargeAsCurrent;
 ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&ImageSelecterGUI::spin, this) {
 
   image_label = new QLabel(this);
-  image_label->setGeometry(200, 0, 100, 100);
-  image_label->setText(QString::fromStdString("image label"));
+//  image_label->setText(QString::fromStdString("image label"));
 
   image_selecter = new QPushButton("select image", this);
-  image_selecter->setGeometry(0, 0, button_width, button_height);
   QObject::connect(image_selecter, &QPushButton::clicked, this, &ImageSelecterGUI::selectImage);
 
   publish_image = new QPushButton("publish image", this);
-  publish_image->setGeometry(100, 0, button_width, button_height);
   QObject::connect(publish_image, &QPushButton::clicked, this, &ImageSelecterGUI::publishImage);
+  publish_image->setEnabled(false);
 
-  checkboxLoadAsGray = new QCheckBox("as blue ch.", this);
-  checkboxLoadAsGray->setGeometry(200, 0, button_width, button_height);
+  checkboxLoadAsGray = new QCheckBox("as blue channel", this);
   if (loadAsBlueChannel) {
     checkboxLoadAsGray->setChecked(true);
   } else {
     checkboxLoadAsGray->setChecked(false);
   }
 
-  checkboxInvGray = new QCheckBox("to red ch.", this);
-  checkboxInvGray->setGeometry(300, 0, button_width, button_height);
+  checkboxInvGray = new QCheckBox("to red channel", this);
   if (convertToRedChannel) {
     checkboxInvGray->setChecked(true);
   } else {
@@ -61,31 +53,43 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
   }
 
   checkboxSendAsCurrent = new QCheckBox("as current", this);
-  checkboxSendAsCurrent->setGeometry(400, 0, button_width, button_height);
   if (chargeAsCurrent) {
     checkboxSendAsCurrent->setChecked(true);
   } else {
     checkboxSendAsCurrent->setChecked(false);
   }
 
-  image_label->setBackgroundRole(QPalette::Base);
-  image_label->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-  image_label->setScaledContents(true);
+  qhBox1 = new QHBoxLayout;
+  qhBox1->addWidget(image_selecter);
+  qhBox1->addWidget(publish_image);
+  qhBox1->addWidget(checkboxLoadAsGray);
+  qhBox1->addWidget(checkboxInvGray);
+  qhBox1->addWidget(checkboxSendAsCurrent);
+  groupBox1 = new QGroupBox(this);
+  groupBox1->setTitle("Parameter");
+  groupBox1->setLayout(qhBox1);
+  QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+  groupBox1->setSizePolicy(sizePolicy);
 
-  this->setMinimumSize(500, 500);
+  // Total Gui
   this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
+  gridLayout1 = new QGridLayout();
+  gridLayout1->addWidget(groupBox1, 0, 0);
+  gridLayout1->addWidget(image_label, 1, 0);
+  this->setLayout(gridLayout1);
 
-  label = new QLabel(this);
 }
 
 ImageSelecterGUI::~ImageSelecterGUI() {
-  delete label;
+//  delete label;
   delete checkboxSendAsCurrent;
   delete checkboxLoadAsGray;
   delete checkboxInvGray;
   delete publish_image;
   delete image_selecter;
   delete image_label;
+  delete qhBox1;
+  delete groupBox1;
 
   shutdown_required = true;
   thread.join();
@@ -93,9 +97,7 @@ ImageSelecterGUI::~ImageSelecterGUI() {
 
 void ImageSelecterGUI::spin() {
   ros::Rate loop(10);
-  cout << "debug 1" << endl;
   while (ros::ok()) {
-    cout << "debug 2" << endl;
     ros::spinOnce();
     loop.sleep();
   }
@@ -142,19 +144,12 @@ void ImageSelecterGUI::selectImage() {
   cv::cvtColor(cv_image, rgb, CV_BGR2RGB);
   qt_image = mat2QImage(rgb);
 
-  label->setPixmap(QPixmap::fromImage(qt_image));
-  image_label = label;
-  this->setMinimumSize(qt_image.width(), qt_image.height() + button_height);
-  image_label->setGeometry(0, button_height, qt_image.width(), qt_image.height() + button_height);
+  image_label->setPixmap(QPixmap::fromImage(qt_image));
   image_label->show();
-  imageSelected = true;
+  publish_image->setEnabled(true);
 }
 
 void ImageSelecterGUI::publishImage() {
-  if (!imageSelected) {
-    ROS_WARN("[%s] Please selected an image first.", ros::this_node::getName().c_str());
-    return;
-  }
   cv_bridge::CvImage cvImage;
   cvImage.encoding = sensor_msgs::image_encodings::BGR8;
   cvImage.image = cv_image;

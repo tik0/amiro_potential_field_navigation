@@ -95,12 +95,13 @@ private:
   QRadioButton *radioButton2;
   QSlider *transparencySlider1;
   QSlider *transparencySlider2;
+  QLabel *scopeLabel1;
+  QLabel *scopeLabel2;
   QLabel *transparencySliderLabel1;
   QLabel *transparencySliderLabel2;
   QLabel *transparencySliderLabelInfo1;
   QLabel *transparencySliderLabelInfo2;
   QLabel *imageLabel1;
-//  QLabel *imageLabel2;
 };
 
 #endif //_IMAGE_VIEWER_GUI_HPP_
