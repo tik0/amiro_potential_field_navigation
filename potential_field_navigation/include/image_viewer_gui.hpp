@@ -13,6 +13,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QCheckBox>
+#include <QRadioButton>
 #include <QLineEdit>
 #include <QSlider>
 #include <QGroupBox>
@@ -58,19 +59,28 @@ private:
 
   void clickedLoadImageButton2();
 
-  void updateImages();
+  void clickedRadioButton1();
+
+  void clickedRadioButton2();
+
+  void updateImageLabel();
+
+  void updateImage1();
+
+  void updateImage2();
 
 private:
-
-  cv::Mat image1;
-  cv::Mat image2;
-  bool image1Loaded = false;
-  bool image2Loaded = false;
 
   bool shutdown_required;
   boost::thread thread;
 
-  QGroupBox * groupBox0;
+  cv::Mat image1copy;
+  cv::Mat image2copy;
+  cv::Mat blended;
+  boost::mutex mtx_image1copy;
+  boost::mutex mtx_image2copy;
+
+  QGroupBox *groupBox0;
   QGroupBox *groupBox1;
   QGroupBox *groupBox2;
   QGridLayout *gridLayout1;
@@ -81,6 +91,8 @@ private:
   QLineEdit *textBox2;
   QPushButton *loadImageButton1;
   QPushButton *loadImageButton2;
+  QRadioButton *radioButton1;
+  QRadioButton *radioButton2;
   QSlider *transparencySlider1;
   QSlider *transparencySlider2;
   QLabel *transparencySliderLabel1;
