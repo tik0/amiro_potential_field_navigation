@@ -39,7 +39,7 @@ static int heuristic_apply;
 
 void process(const sensor_msgs::ImageConstPtr &msg) {
   cv::Mat image = cv_bridge::toCvShare(msg, msg->encoding)->image;
-  rot90(image, RotateFlags::ROTATE_90_COUNTERCLOCKWISE);
+//  rot90(image, RotateFlags::ROTATE_90_COUNTERCLOCKWISE);
   cv::Mat bgr[3];
   cv::split(image,bgr);
   cv::Mat potentialField(image.size(), CV_32FC1, cv::Scalar(0.0f)), vectorField;
@@ -92,11 +92,11 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   }
 
   if (msg->header.frame_id.compare("charge") == 0) {
-    ROS_INFO("%s calculate image as charge", ros::this_node::getName().c_str());
+    ROS_INFO("[%s] calculate image as charge", ros::this_node::getName().c_str());
     // Get vector field
     vectorField = potentialfield_to_vectorfield(potentialField, false);
   } else if (msg->header.frame_id.compare("current") == 0) {
-    ROS_INFO("%s calculate image as current", ros::this_node::getName().c_str());
+    ROS_INFO("[%s] calculate image as current", ros::this_node::getName().c_str());
     // Get vector field
     vectorField = potentialfield_to_vectorfield(potentialField, true);
   } else {
@@ -133,13 +133,16 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   // Send the data
   cv_bridge::CvImage cvImagePot;
   cvImagePot.encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-  rot90(potentialField, RotateFlags::ROTATE_90_CLOCKWISE);
+//  rot90(potentialField, RotateFlags::ROTATE_90_CLOCKWISE);
   cvImagePot.image = potentialField;
   cv_bridge::CvImage cvImageVec;
   cvImageVec.encoding = sensor_msgs::image_encodings::TYPE_32FC2;
   cvImageVec.image = vectorField;
   imagePublisherPot.publish(cvImagePot.toImageMsg());
+  ROS_INFO("[%s] publish potentialfield.", ros::this_node::getName().c_str());
   imagePublisherVec.publish(cvImageVec.toImageMsg());
+  ROS_INFO("[%s] publish vectorfield.", ros::this_node::getName().c_str());
+
 }
 
 int main(int argc, char *argv[]) {

@@ -30,6 +30,7 @@ using namespace std;
 static std::string rosListenerTopic;
 static std::string rosPublisherTopic;
 
+static image_transport::Publisher rgbImagePublisher;
 ros::Publisher gridMapPublisher;
 
 //params
@@ -47,6 +48,7 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   cvImage.encoding = sensor_msgs::image_encodings::RGB8;
   cvImage.image = rgb;
   sensor_msgs::ImagePtr rgbImage = cvImage.toImageMsg();
+  rgbImagePublisher.publish(rgbImage);
 
   // Get the height
   cv::Mat mono = hsv_to_gray(hsv);
@@ -65,7 +67,7 @@ void process(const sensor_msgs::ImageConstPtr &msg) {
   grid_map::GridMapRosConverter::toMessage(gridmap, gridmap_msg);
 
   gridmap_msg.info.header.frame_id = frame_id;
-  ROS_INFO("[%s] publish gridmap", ros::this_node::getName().c_str());
+  ROS_INFO("[%s] publish gridmap.", ros::this_node::getName().c_str());
   gridMapPublisher.publish(gridmap_msg);
 }
 
@@ -86,6 +88,8 @@ int main(int argc, char *argv[]) {
   gridMapPublisher = node.advertise<grid_map_msgs::GridMap>(rosPublisherTopic, 1, true);
 
   image_transport::ImageTransport imageTransport(node);
+  rgbImagePublisher = imageTransport.advertise(rosPublisherTopic+"/rgb_image", 1, true);
+
   image_transport::Subscriber image_sub = imageTransport.subscribe(rosListenerTopic, 1, &process);
 
 

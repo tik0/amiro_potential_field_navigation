@@ -1,11 +1,11 @@
 <launch>
 
   <node name="master_discovery" pkg="master_discovery_fkie" type="master_discovery">
-    <rosparam param="robot_hosts">['alpia']</rosparam>
+    <rosparam param="robot_hosts">['twbserver.ks.techfak.uni-bielefeld.de']</rosparam>
   </node>
 
   <node name="master_sync" pkg="master_sync_fkie" type="master_sync">
-    <rosparam param="sync_topics">['/shm_to_ros_node*']</rosparam>
+    <rosparam param="sync_topics">['/genicam_cam*', '/artoolkit5_*']</rosparam>
   </node>
 
 </launch>

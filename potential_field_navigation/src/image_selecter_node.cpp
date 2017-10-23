@@ -118,7 +118,7 @@ void ImageSelecterGUI::selectImage() {
 
   // Invert the color channel if necessary
   if (cv_image.channels() == 1) {
-    ROS_INFO_STREAM(ros::this_node::getName() << " loaded gray scale image");
+    ROS_INFO("[%s] loaded gray scale image", ros::this_node::getName().c_str());
     std::vector<cv::Mat> array_to_merge(3);
     cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
     if (checkboxInvGray->checkState() == Qt::CheckState::Checked) {
@@ -133,9 +133,9 @@ void ImageSelecterGUI::selectImage() {
     }
     cv::merge(array_to_merge, cv_image);
   } else if (cv_image.channels() == 3) {
-    ROS_INFO_STREAM(ros::this_node::getName() << " loaded BGR image");
+    ROS_INFO("[%s] loaded BGR image", ros::this_node::getName().c_str());
   } else {
-    ROS_ERROR_STREAM(ros::this_node::getName() << " Unsupported number of channels");
+    ROS_ERROR("[%s] Unsupported number of channels", ros::this_node::getName().c_str());
     return;
   }
 
@@ -144,7 +144,14 @@ void ImageSelecterGUI::selectImage() {
   cv::cvtColor(cv_image, rgb, CV_BGR2RGB);
   qt_image = mat2QImage(rgb);
 
-  image_label->setPixmap(QPixmap::fromImage(qt_image));
+
+  if(qt_image.size().width() > 1200) {
+    image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToWidth(1200)));
+  } else if(qt_image.size().height() > 1000) {
+    image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToHeight(1000)));
+  } else {
+    image_label->setPixmap(QPixmap::fromImage(qt_image));
+  }
   image_label->show();
   publish_image->setEnabled(true);
 }
@@ -154,20 +161,20 @@ void ImageSelecterGUI::publishImage() {
   cvImage.encoding = sensor_msgs::image_encodings::BGR8;
   cvImage.image = cv_image;
   if (checkboxSendAsCurrent->checkState() == Qt::CheckState::Checked) {
-    std::cerr << "Send as current" << std::endl;
+    ROS_INFO("[%s] Send as current", ros::this_node::getName().c_str());
     cvImage.header.frame_id = "current";
   } else {
     cvImage.header.frame_id = "charge";
-    std::cerr << "Send as charge" << std::endl;
+    ROS_INFO("[%s] Send as charge", ros::this_node::getName().c_str());
   }
   imagePublisher.publish(cvImage.toImageMsg());
 }
 
 int main(int argc, char *argv[]) {
-  ROS_INFO_STREAM("Start: " << ros::this_node::getName());
   // Init ROS
   ros::init(argc, argv, ros::this_node::getName());
   ros::NodeHandle node("~");
+  ROS_INFO("Start: %s", ros::this_node::getName().c_str());
 
 // Ros Topics
   string rosPublisherTopic;
@@ -179,7 +186,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
 
   image_transport::ImageTransport imageTransport(node);
-  imagePublisher = imageTransport.advertise(rosPublisherTopic, 1);
+  imagePublisher = imageTransport.advertise(rosPublisherTopic, 1, true);
 
   QApplication app(argc, argv);
   ImageSelecterGUI gui;
