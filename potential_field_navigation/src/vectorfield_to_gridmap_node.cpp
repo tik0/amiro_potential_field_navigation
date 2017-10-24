@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
   node.param<string>("gridmap_publisher_topic", rosPublisherTopic, "/gridmap");
   node.param<string>("frame_id", frame_id, "world");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
+  ROS_INFO("[%s] frame_id: %s", ros::this_node::getName().c_str(), frame_id.c_str());
   ROS_INFO("[%s] potentialfield_listener_topic: %s", ros::this_node::getName().c_str(), rosListenerTopic.c_str());
   ROS_INFO("[%s] gridmap_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
   ROS_INFO("[%s] meter_per_pixel: %f", ros::this_node::getName().c_str(), meterPerPixel);

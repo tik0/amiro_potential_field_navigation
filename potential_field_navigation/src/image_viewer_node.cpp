@@ -260,7 +260,7 @@ void ImageViewGUI::updateImageLabel() {
     }
     imageLabel1->show();
   } else {
-    ROS_INFO("[%s] Cannot update imagelabel. Images are empty image1 %d image2 %d", ros::this_node::getName().c_str(), image1copy.empty(), image2copy.empty());
+//    ROS_INFO("[%s] Cannot update imagelabel. Images are empty image1 %d image2 %d", ros::this_node::getName().c_str(), image1copy.empty(), image2copy.empty());
   }
 }
 
