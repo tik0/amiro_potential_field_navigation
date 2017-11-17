@@ -33,13 +33,14 @@ static float velocityScale_meterPerSecond = 0.1;
 static float angularScale_radPerSecond = 0.1;
 static bool pixelMode;
 static bool twistMode;
+static double pixelScale;
 
 void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) {
 
   cv::Point2i pose2d;
-  if(pixelMode) {
-    pose2d = cv::Point2i((int) odom->pose.pose.position.x, (int) odom->pose.pose.position.y);
-  }else {
+  if (pixelMode) {
+    pose2d = cv::Point2i((int) odom->pose.pose.position.x * pixelScale, (int) odom->pose.pose.position.y * pixelScale);
+  } else {
     pose2d = cv::Point2i(pose2pixel(odom->pose.pose, vectorfield.cols, vectorfield.rows, meterPerPixel));
   }
   if (pose2d.x < 0 || pose2d.x >= vectorfield.cols || pose2d.y < 0 || pose2d.y >= vectorfield.rows) {
@@ -56,7 +57,7 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   const double robotAngle = tf::getYaw(odom->pose.pose.orientation);
   const float angleDiff = getAngleDiff(robotAngle, vectorAngle);
 
-  if(twistMode) {
+  if (twistMode) {
     // Calculate the steering vector
     geometry_msgs::Twist twist;
     twist.linear.x = velocityScale_meterPerSecond * vectorAbs;
@@ -65,8 +66,8 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
     pub.publish(twist);
   } else {
     geometry_msgs::Vector3 vec3;
-    vec3.x = cos(angleDiff + M_PI/2) * vectorAbs;
-    vec3.y = sin(angleDiff + M_PI/2) * vectorAbs;
+    vec3.x = cos(angleDiff + M_PI / 2) * vectorAbs;
+    vec3.y = sin(angleDiff + M_PI / 2) * vectorAbs;
     pub.publish(vec3);
   }
 }
@@ -76,7 +77,7 @@ void processSynced(const sensor_msgs::ImageConstPtr &image, const nav_msgs::Odom
   process(vectorfield, odom);
 }
 
-void processVectorfield(const sensor_msgs::ImageConstPtr& msg) {
+void processVectorfield(const sensor_msgs::ImageConstPtr &msg) {
   // TODO Normalize vectorfield (?)
   vectorfield = cv_bridge::toCvCopy(msg, msg->encoding)->image;
   dataArrived = true;
@@ -112,6 +113,7 @@ int main(int argc, char *argv[]) {
   node.param<int>("syncTopics", syncTopics, 0);
   node.param<bool>("pixel_mode", pixelMode, false);
   node.param<bool>("twist_mode", twistMode, false);
+  node.param<double>("pixel_scale", pixelScale, 1.0);
   ROS_INFO("[%s] vectorfield_listener_topic: %s", ros::this_node::getName().c_str(), vectorfield_listener_topic.c_str());
   ROS_INFO("[%s] amiro_odom_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] twist_publisher_topic: %s", ros::this_node::getName().c_str(), twistPublisherTopic.c_str());
@@ -119,8 +121,9 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] meter_per_pixel: %f", ros::this_node::getName().c_str(), meterPerPixel);
   ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
   ROS_INFO("[%s] twist_mode: %i", ros::this_node::getName().c_str(), twistMode);
+  ROS_INFO("[%s] pixel_scale: %f", ros::this_node::getName().c_str(), pixelScale);
 
-  if(twistMode) {
+  if (twistMode) {
     // The twist publisher
     pub = node.advertise<geometry_msgs::Twist>(twistPublisherTopic, 1);
   } else {

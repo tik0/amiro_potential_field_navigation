@@ -27,6 +27,8 @@ static int heuristic_apply;
 static double meterPerPixel;
 static int imageWidth;
 static int imageHeight;
+static bool pixelMode;
+static double pixelScale;
 
 // ros::Publisher rosPublisher;
 static image_transport::Publisher imagePublisherPot, imagePublisherVec;
@@ -39,7 +41,11 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
   cv::Mat potentialField(imageHeight, imageWidth, CV_32FC1);
   cv::Point2i pose2d;
 //    pose2d = cv::Point2i((int) (odom->pose.pose.position.x / meterPerPixel + imageWidth/2), (int) (odom->pose.pose.position.y / meterPerPixel + imageHeight/2));
-    pose2d = cv::Point2i((int) (imageWidth/2 - odom->pose.pose.position.y / meterPerPixel), (int) (imageHeight/2 - odom->pose.pose.position.x / meterPerPixel));
+  if (pixelMode) {
+    pose2d = cv::Point2i(odom->pose.pose.position.x * pixelScale, odom->pose.pose.position.y * pixelScale);
+  } else {
+    pose2d = cv::Point2i((int) (imageWidth / 2 - odom->pose.pose.position.y / meterPerPixel), (int) (imageHeight / 2 - odom->pose.pose.position.x / meterPerPixel));
+  }
 
 
   if (firstRun) {
@@ -60,10 +66,10 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
   for (int y = 0; y < potentialField.rows; y++) {
     for (int x = 0; x < potentialField.cols; x++) {
       if (x != pose2d.x || y != pose2d.y) {
-        const float xDiff = x-pose2d.x;
-        const float yDiff = y-pose2d.y;
+        const float xDiff = x - pose2d.x;
+        const float yDiff = y - pose2d.y;
         // We assume a positive charge (s.t. repelling)
-        potentialField.at<float>(y, x) = 1.0 / sqrt(xDiff*xDiff + yDiff*yDiff);
+        potentialField.at<float>(y, x) = 1.0 / sqrt(xDiff * xDiff + yDiff * yDiff);
       }
     }
   }
@@ -76,7 +82,7 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
     for (int idx = 0; idx < potentialField.rows * potentialField.cols; ++idx) {
       float &x = vectorField.at<cv::Vec2f>(idx)[0];
       float &y = vectorField.at<cv::Vec2f>(idx)[1];
-      const float abs = sqrt(x*x + y*y);
+      const float abs = sqrt(x * x + y * y);
       if (abs > heuristic_abs_min) {
         x = 0.0;
         y = 0.0;
@@ -110,12 +116,14 @@ int main(int argc, char *argv[]) {
   node.param<string>("potentialfield_publisher_topic", rosPublisherTopicPot, "/potentialfield/amiro1");
   node.param<string>("vectorfield_publisher_topic", rosPublisherTopicVec, "/vectorfield/amiro1");
   node.param<double>("meter_per_pixel", meterPerPixel, 0.003);
+  node.param<bool>("pixel_mode", pixelMode, false);
   node.param<int>("heuristic_apply", heuristic_apply, 1);
   node.param<float>("heuristic_abs_min", heuristic_abs_min, 0.2);
   node.param<float>("heuristic_factor", heuristic_factor, 0.2);
   node.param<int>("image_width", imageWidth, 1000);
   node.param<int>("image_height", imageHeight, 1000);
   node.param<int>("minimum_pose_difference_pixel", minPoseDiff_pixel, 10);
+  node.param<double>("pixel_scale", pixelScale, 1.0);
   ROS_INFO("[%s] image_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] potentialfield_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopicPot.c_str());
   ROS_INFO("[%s] vectorfield_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopicVec.c_str());
@@ -123,6 +131,8 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] image_width: %d", ros::this_node::getName().c_str(), imageWidth);
   ROS_INFO("[%s] image_height: %d", ros::this_node::getName().c_str(), imageHeight);
   ROS_INFO("[%s] minimum_pose_difference_pixel: %d", ros::this_node::getName().c_str(), minPoseDiff_pixel);
+  ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
+  ROS_INFO("[%s] pixel_scale: %f", ros::this_node::getName().c_str(), pixelScale);
 
   image_transport::ImageTransport imageTransport(node);
   imagePublisherPot = imageTransport.advertise(rosPublisherTopicPot, 1, true);
