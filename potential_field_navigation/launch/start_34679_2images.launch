@@ -38,14 +38,28 @@
   </node>
 
   <!--Image Selecter Node-->
-  <node name="image_selecter_node" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
-    <param name="image_publisher_topic" value="/image"/>
+  <node name="image_selecter_node1" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
+    <param name="image_publisher_topic" value="/image1"/>
+  </node>
+  <node name="image_selecter_node2" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
+    <param name="image_publisher_topic" value="/image2"/>
   </node>
 
-  <node name="image_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
-    <param name="image_listener_topic" value="/image"/>
-    <param name="potentialfield_publisher_topic" value="/potentialfield/image"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/image"/>
+  <node name="image1_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+    <param name="image_listener_topic" value="/image1"/>
+    <param name="potentialfield_publisher_topic" value="/potentialfield/image1"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/image1"/>
+    <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+    <param name="heuristic_abs_min" value="0.8"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+    <param name="heuristic_apply" value="1"/> <?Use heuristic instead of native vectorfield?>
+    <param name="desired_vectorfield_width" value="$(arg image_width)"/>
+    <param name="desired_vectorfield_height" value="$(arg image_height)"/>
+  </node>
+
+  <node name="image2_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+    <param name="image_listener_topic" value="/image2"/>
+    <param name="potentialfield_publisher_topic" value="/potentialfield/image2"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/image2"/>
     <param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
     <param name="heuristic_abs_min" value="0.8"/> <?Undefined An arbitrary value which indecates the start of value decay?>
     <param name="heuristic_apply" value="1"/> <?Use heuristic instead of native vectorfield?>
@@ -271,12 +285,12 @@
     <param name="normalize" value="1"/>
   </node>-->
 
-  <node name="vectorfield_merger_3_9" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
-    <param name="field1_listener_topic" value="/vectorfield/amiro9"/>
-    <param name="field2_listener_topic" value="/vectorfield/amiro3"/>
+  <node name="vectorfield_merger_image1_image2" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/image1"/>
+    <param name="field2_listener_topic" value="/vectorfield/image2"/>
     <param name="field_width" value="$(arg image_width)"/>
     <param name="field_height" value="$(arg image_height)"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/39/fused"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/image"/>
     <param name="normalize" value="0"/>
   </node>
 
@@ -289,46 +303,149 @@
     <param name="normalize" value="0"/>
   </node>
 
-  <node name="vectorfield_merger_4_9" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
-    <param name="field1_listener_topic" value="/vectorfield/amiro9"/>
-    <param name="field2_listener_topic" value="/vectorfield/amiro4"/>
+  <node name="vectorfield_merger_7_9" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro7"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro9"/>
     <param name="field_width" value="$(arg image_width)"/>
     <param name="field_height" value="$(arg image_height)"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/49/fused"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/79/fused"/>
     <param name="normalize" value="0"/>
   </node>
 
-  <node name="vectorfield_merger_39_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
-    <param name="field1_listener_topic" value="/vectorfield/image"/>
-    <param name="field2_listener_topic" value="/vectorfield/39/fused"/>
+  <node name="vectorfield_merger_6_7" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro6"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro7"/>
     <param name="field_width" value="$(arg image_width)"/>
     <param name="field_height" value="$(arg image_height)"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/39image/fused"/>
-    <param name="normalize" value="1"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/67/fused"/>
+    <param name="normalize" value="0"/>
   </node>
 
-  <node name="vectorfield_merger_49_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
-    <param name="field1_listener_topic" value="/vectorfield/49/fused"/>
-    <param name="field2_listener_topic" value="/vectorfield/image"/>
+  <node name="vectorfield_merger_6_9" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro6"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro9"/>
     <param name="field_width" value="$(arg image_width)"/>
     <param name="field_height" value="$(arg image_height)"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/49image/fused"/>
-    <param name="normalize" value="1"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/69/fused"/>
+    <param name="normalize" value="0"/>
   </node>
 
-  <node name="vectorfield_merger_34_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+  <node name="vectorfield_merger_3_6" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro3"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro6"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/36/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_4_6" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/amiro4"/>
+    <param name="field2_listener_topic" value="/vectorfield/amiro6"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/46/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_3467" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
     <param name="field1_listener_topic" value="/vectorfield/34/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/67/fused"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3467/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_3469" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/34/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/69/fused"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3469/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_3479" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/34/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/79/fused"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3479/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_3679" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/36/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/79/fused"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3679/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_4679" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/46/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/79/fused"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/4679/fused"/>
+    <param name="normalize" value="0"/>
+  </node>
+
+  <node name="vectorfield_merger_3467_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/3467/fused"/>
     <param name="field2_listener_topic" value="/vectorfield/image"/>
     <param name="field_width" value="$(arg image_width)"/>
     <param name="field_height" value="$(arg image_height)"/>
-    <param name="vectorfield_publisher_topic" value="/vectorfield/34image/fused"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3467image/fused"/>
     <param name="normalize" value="1"/>
   </node>
+
+
+  <node name="vectorfield_merger_3479_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/3479/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/image"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3479image/fused"/>
+    <param name="normalize" value="1"/>
+  </node>
+
+  <node name="vectorfield_merger_3469_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/3469/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/image"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3469image/fused"/>
+    <param name="normalize" value="1"/>
+  </node>
+
+
+  <node name="vectorfield_merger_3679_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/3679/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/image"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/3679image/fused"/>
+    <param name="normalize" value="1"/>
+  </node>
+
+
+  <node name="vectorfield_merger_4679_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+    <param name="field1_listener_topic" value="/vectorfield/4679/fused"/>
+    <param name="field2_listener_topic" value="/vectorfield/image"/>
+    <param name="field_width" value="$(arg image_width)"/>
+    <param name="field_height" value="$(arg image_height)"/>
+    <param name="vectorfield_publisher_topic" value="/vectorfield/4679image/fused"/>
+    <param name="normalize" value="1"/>
+  </node>
+
 
   <node name="fusion_vectorfield_to_gridmap_node" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <param name="frame_id" value="$(arg cam)_image"/>
-    <param name="vectorfield_listener_topic" value="/vectorfield/fused"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/4679image/fused"/>
     <param name="gridmap_publisher_topic" value="/vectorfield/fused/gridmap"/>
   </node>
   
@@ -336,7 +453,7 @@
   <node name="amiro3_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <!--<param name="vectorfield_listener_topic" value="/vectorfield/image"/>-->
-    <param name="vectorfield_listener_topic" value="/vectorfield/49image/fused"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/4679image/fused"/>
     <!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/3" unless="$(arg pixel_mode)"/>-->
     <param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/3" if="$(arg pixel_mode)" />
     <param name="twist_publisher_topic" value="/amiro3/cmd_vel"/>
@@ -350,7 +467,7 @@
   <node name="amiro4_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <!--<param name="vectorfield_listener_topic" value="/vectorfield/image"/>-->
-    <param name="vectorfield_listener_topic" value="/vectorfield/39image/fused"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/3679image/fused"/>
     <!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/4" unless="$(arg pixel_mode)"/>-->
     <param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/4" if="$(arg pixel_mode)" />
     <param name="twist_publisher_topic" value="/amiro4/cmd_vel"/>
@@ -361,10 +478,38 @@
     <param name="twist_mode" value="True"/>
   </node>
 
+  <node name="amiro6_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+    <!--<param name="vectorfield_listener_topic" value="/vectorfield/image"/>-->
+    <param name="vectorfield_listener_topic" value="/vectorfield/3479image/fused"/>
+    <!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/4" unless="$(arg pixel_mode)"/>-->
+    <param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/6" if="$(arg pixel_mode)" />
+    <param name="twist_publisher_topic" value="/amiro6/cmd_vel"/>
+    <param name="velocityScale_meterPerSecond" value="0.1"/>
+    <param name="angularScale_radPerSecond" value="0.5"/>
+    <param name="pixel_mode" value="$(arg pixel_mode)"/>
+    <param name="pixel_scale" value="$(arg pixel_scale)"/>
+    <param name="twist_mode" value="True"/>
+  </node>
+
+  <node name="amiro7_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+    <!--<param name="vectorfield_listener_topic" value="/vectorfield/image"/>-->
+    <param name="vectorfield_listener_topic" value="/vectorfield/3469image/fused"/>
+    <!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/4" unless="$(arg pixel_mode)"/>-->
+    <param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/7" if="$(arg pixel_mode)" />
+    <param name="twist_publisher_topic" value="/amiro7/cmd_vel"/>
+    <param name="velocityScale_meterPerSecond" value="0.1"/>
+    <param name="angularScale_radPerSecond" value="0.5"/>
+    <param name="pixel_mode" value="$(arg pixel_mode)"/>
+    <param name="pixel_scale" value="$(arg pixel_scale)"/>
+    <param name="twist_mode" value="True"/>
+  </node>
+
   <node name="amiro9_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
     <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
     <!--<param name="vectorfield_listener_topic" value="/vectorfield/image"/>-->
-    <param name="vectorfield_listener_topic" value="/vectorfield/34image/fused"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/3467image/fused"/>
     <!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/9" unless="$(arg pixel_mode)"/>-->
     <param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/9" if="$(arg pixel_mode)" />
     <param name="twist_publisher_topic" value="/amiro9/cmd_vel"/>

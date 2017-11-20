@@ -93,7 +93,8 @@ int main(int argc, char *argv[]) {
         // Fuse
         if (field1.cols != fieldWidth || field1.rows != fieldHeight ||
             field2.cols != fieldWidth || field2.rows != fieldHeight) {
-          ROS_WARN_STREAM(ros::this_node::getName() << " insufficient field size");
+          ROS_WARN_STREAM(ros::this_node::getName() << " insufficient field size: (field1.cols, field1.rows, field2.cols, field2.rows, fieldWidth, fieldHeight)=(" <<
+                          field1.cols << ", " << field1.rows << ", " << field2.cols << ", " << field2.rows << ", " << fieldWidth << ", " << fieldHeight << ")");
           continue;
         }
         vectorfield_merged = field1 + field2;

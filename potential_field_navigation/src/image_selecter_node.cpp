@@ -22,8 +22,8 @@
 using namespace std;
 
 static image_transport::Publisher imagePublisher;
-static int loadAsBlueChannel;
-static int convertToRedChannel;
+static int loadAsMono;
+static int monoAsRed;
 static int chargeAsCurrent;
 
 ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&ImageSelecterGUI::spin, this) {
@@ -38,18 +38,21 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
   QObject::connect(publish_image, &QPushButton::clicked, this, &ImageSelecterGUI::publishImage);
   publish_image->setEnabled(false);
 
-  checkboxLoadAsGray = new QCheckBox("as blue channel", this);
-  if (loadAsBlueChannel) {
+  checkboxLoadAsGray = new QCheckBox("image as mono", this);
+  if (loadAsMono) {
     checkboxLoadAsGray->setChecked(true);
   } else {
     checkboxLoadAsGray->setChecked(false);
   }
 
-  checkboxInvGray = new QCheckBox("to red channel", this);
-  if (convertToRedChannel) {
-    checkboxInvGray->setChecked(true);
+  radioButtonRed = new QRadioButton("mono as red");
+  radioButtonBlue = new QRadioButton("mono as blue");
+  if (monoAsRed) {
+    radioButtonBlue->setChecked(false);
+    radioButtonRed->setChecked(true);
   } else {
-    checkboxInvGray->setChecked(false);
+    radioButtonBlue->setChecked(true);
+    radioButtonRed->setChecked(false);
   }
 
   checkboxSendAsCurrent = new QCheckBox("as current", this);
@@ -63,7 +66,8 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
   qhBox1->addWidget(image_selecter);
   qhBox1->addWidget(publish_image);
   qhBox1->addWidget(checkboxLoadAsGray);
-  qhBox1->addWidget(checkboxInvGray);
+  qhBox1->addWidget(radioButtonRed);
+  qhBox1->addWidget(radioButtonBlue);
   qhBox1->addWidget(checkboxSendAsCurrent);
   groupBox1 = new QGroupBox(this);
   groupBox1->setTitle("Parameter");
@@ -84,7 +88,8 @@ ImageSelecterGUI::~ImageSelecterGUI() {
 //  delete label;
   delete checkboxSendAsCurrent;
   delete checkboxLoadAsGray;
-  delete checkboxInvGray;
+  delete radioButtonBlue;
+  delete radioButtonRed;
   delete publish_image;
   delete image_selecter;
   delete image_label;
@@ -121,7 +126,7 @@ void ImageSelecterGUI::selectImage() {
     ROS_INFO("[%s] loaded gray scale image", ros::this_node::getName().c_str());
     std::vector<cv::Mat> array_to_merge(3);
     cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
-    if (checkboxInvGray->checkState() == Qt::CheckState::Checked) {
+    if (radioButtonRed->isChecked()) {
       cv::Mat dummy(cv_image.size(), cv_image.type(), cv::Scalar(uchar(0)));
       dummy.copyTo(array_to_merge.at(0));
       dummy.copyTo(array_to_merge.at(1));
@@ -180,8 +185,8 @@ int main(int argc, char *argv[]) {
   string rosPublisherTopic;
 
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
-  node.param<int>("load_as_blue_channel", loadAsBlueChannel, 1);
-  node.param<int>("convert_to_red_channel", convertToRedChannel, 0);
+  node.param<int>("load_as_mono", loadAsMono, 1);
+  node.param<int>("mono_as_red", monoAsRed, 0);
   node.param<int>("charge_as_current", chargeAsCurrent, 0);
   ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
 

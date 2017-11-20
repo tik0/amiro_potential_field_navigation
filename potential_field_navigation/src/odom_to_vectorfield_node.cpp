@@ -42,11 +42,10 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
   cv::Point2i pose2d;
 //    pose2d = cv::Point2i((int) (odom->pose.pose.position.x / meterPerPixel + imageWidth/2), (int) (odom->pose.pose.position.y / meterPerPixel + imageHeight/2));
   if (pixelMode) {
-    pose2d = cv::Point2i(odom->pose.pose.position.x * pixelScale, odom->pose.pose.position.y * pixelScale);
+    pose2d = cv::Point2i((int) (odom->pose.pose.position.x * pixelScale), (int) (odom->pose.pose.position.y * pixelScale));
   } else {
     pose2d = cv::Point2i((int) (imageWidth / 2 - odom->pose.pose.position.y / meterPerPixel), (int) (imageHeight / 2 - odom->pose.pose.position.x / meterPerPixel));
   }
-
 
   if (firstRun) {
     firstRun = false;

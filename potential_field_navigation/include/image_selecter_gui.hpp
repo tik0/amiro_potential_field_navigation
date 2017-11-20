@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QGridLayout>
+#include <QRadioButton>
 
 #include <boost/thread.hpp>
 
@@ -67,8 +68,9 @@ private:
   QPushButton *image_selecter;
   QLabel *image_label;
   QCheckBox *checkboxLoadAsGray;
-  QCheckBox *checkboxInvGray;
   QCheckBox *checkboxSendAsCurrent;
+  QRadioButton *radioButtonRed;
+  QRadioButton *radioButtonBlue;
 
 };
 

@@ -7,10 +7,12 @@ Panels:
         - /Global Options1
         - /TF1/Frames1
         - /Odometry Marker 31/Shape1
-        - /Odometry Marker 41
-        - /Odometry Marker 41/Shape1
+        - /Odometry Marker 61/Shape1
+        - /Odometry Marker 71/Shape1
+        - /Odometry Marker 81/Shape1
+        - /Odometry Marker 91/Shape1
       Splitter Ratio: 0.60911274
-    Tree Height: 503
+    Tree Height: 367
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -29,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: PotentialField_Image
+    SyncSource: Image
 Visualization Manager:
   Class: ""
   Displays:
@@ -132,6 +134,69 @@ Visualization Manager:
       Max Intensity: 10
       Min Color: 0; 0; 0
       Min Intensity: 0
+      Name: GridMap_AMiRo3
+      Show Grid Lines: false
+      Topic: /vectorfield/amiro3/gridmap
+      Unreliable: false
+      Use Rainbow: true
+      Value: false
+    - Alpha: 0.100000001
+      Autocompute Intensity Bounds: true
+      Class: grid_map_rviz_plugin/GridMap
+      Color: 200; 200; 200
+      Color Layer: color
+      Color Transformer: ColorLayer
+      Enabled: false
+      Height Layer: elevation
+      Height Transformer: Layer
+      History Length: 1
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 10
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: GridMap_AMiRo4
+      Show Grid Lines: false
+      Topic: /vectorfield/amiro4/gridmap
+      Unreliable: false
+      Use Rainbow: true
+      Value: false
+    - Alpha: 0.100000001
+      Autocompute Intensity Bounds: true
+      Class: grid_map_rviz_plugin/GridMap
+      Color: 200; 200; 200
+      Color Layer: color
+      Color Transformer: ColorLayer
+      Enabled: false
+      Height Layer: elevation
+      Height Transformer: Layer
+      History Length: 1
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 10
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: GridMap_AMiRo9
+      Show Grid Lines: false
+      Topic: /vectorfield/amiro9/gridmap
+      Unreliable: false
+      Use Rainbow: true
+      Value: false
+    - Alpha: 0.5
+      Autocompute Intensity Bounds: true
+      Class: grid_map_rviz_plugin/GridMap
+      Color: 200; 200; 200
+      Color Layer: color
+      Color Transformer: ColorLayer
+      Enabled: false
+      Height Layer: elevation
+      Height Transformer: Layer
+      History Length: 1
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 10
+      Min Color: 0; 0; 0
+      Min Intensity: 0
       Name: GridMap_Image
       Show Grid Lines: false
       Topic: /vectorfield/image/gridmap
@@ -146,9 +211,9 @@ Visualization Manager:
         cam3_2:
           Value: true
         cam3_2_image:
-          Value: true
-        world:
           Value: false
+        world:
+          Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -162,7 +227,7 @@ Visualization Manager:
             {}
       Update Interval: 0
       Value: true
-    - Alpha: 0.100000001
+    - Alpha: 0.400000006
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
       Color: 200; 200; 200
@@ -242,13 +307,161 @@ Visualization Manager:
         Alpha: 1
         Axes Length: 1
         Axes Radius: 0.100000001
-        Color: 0; 255; 255
+        Color: 255; 85; 0
         Head Length: 0.300000012
         Head Radius: 0.100000001
         Shaft Length: 1
         Shaft Radius: 0.0500000007
         Value: Arrow
       Topic: /artoolkit5_cam3_2/cam/odom/4
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
+      Enabled: true
+      Keep: 1
+      Name: Odometry Marker 6
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.100000001
+        Color: 255; 85; 255
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Arrow
+      Topic: /artoolkit5_cam3_2/cam/odom/6
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
+      Enabled: true
+      Keep: 1
+      Name: Odometry Marker 7
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.100000001
+        Color: 181; 143; 255
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Arrow
+      Topic: /artoolkit5_cam3_2/cam/odom/7
+      Unreliable: false
+      Value: true
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
+      Enabled: false
+      Keep: 1
+      Name: Odometry Marker 8
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.100000001
+        Color: 255; 188; 133
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Arrow
+      Topic: /artoolkit5_cam3_2/cam/odom/8
+      Unreliable: false
+      Value: false
+    - Angle Tolerance: 0.100000001
+      Class: rviz/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.300000012
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: false
+      Enabled: true
+      Keep: 1
+      Name: Odometry Marker 9
+      Position Tolerance: 0.100000001
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.100000001
+        Color: 32; 255; 222
+        Head Length: 0.300000012
+        Head Radius: 0.100000001
+        Shaft Length: 1
+        Shaft Radius: 0.0500000007
+        Value: Arrow
+      Topic: /artoolkit5_cam3_2/cam/odom/9
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /potentialfield/amiro9
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
       Unreliable: false
       Value: true
   Enabled: true
@@ -275,25 +488,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 3.99860644
+      Distance: 4.57734013
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.181911036
-        Y: -0.0326954536
-        Z: 0.219543278
+        X: -0.0655551106
+        Y: 0.128240705
+        Z: 0.140379325
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 1.44479644
+      Pitch: 0.864796579
       Target Frame: world
       Value: Orbit (rviz)
-      Yaw: 1.6735487
+      Yaw: 4.68673134
     Saved: ~
 Window Geometry:
   Displays:
@@ -301,11 +514,13 @@ Window Geometry:
   Height: 1174
   Hide Left Dock: false
   Hide Right Dock: true
+  Image:
+    collapsed: false
   PotentialField_AMiRo1:
     collapsed: false
   PotentialField_Image:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd00000004000000000000020b000003eefc020000000cfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003a0000027f000000c600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000280050006f00740065006e007400690061006c004600690065006c0064005f0049006d00610067006501000002bf000001690000001600fffffffb0000000c00430061006d00650072006100000002d9000000c80000000000000000fb000000120049006d006100670065005200470042004100000002d9000000c80000000000000000fb0000002a0050006f00740065006e007400690061006c004600690065006c0064005f0041004d00690052006f00310000000308000000eb0000001600ffffff0000000100000110000003eefc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003a000003ee0000009e00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000004efc0100000002fb0000000800540069006d00650100000000000007800000024400fffffffb0000000800540069006d006501000000000000045000000000000000000000056f000003ee00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000284000003eefc020000000dfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003a000001f7000000c600fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000280050006f00740065006e007400690061006c004600690065006c0064005f0049006d00610067006501000002370000011d0000001600fffffffb0000000c00430061006d00650072006100000002d9000000c80000000000000000fb000000120049006d006100670065005200470042004100000002d9000000c80000000000000000fb0000002a0050006f00740065006e007400690061006c004600690065006c0064005f0041004d00690052006f00310000000308000000eb0000001600fffffffb0000000a0049006d006100670065010000035a000000ce0000001600ffffff0000000100000110000003eefc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003a000003ee0000009e00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000004efc0100000002fb0000000800540069006d00650100000000000007800000024400fffffffb0000000800540069006d00650100000000000004500000000000000000000004f6000003ee00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:

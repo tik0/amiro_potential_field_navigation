@@ -39,7 +39,7 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
 
   cv::Point2i pose2d;
   if (pixelMode) {
-    pose2d = cv::Point2i((int) odom->pose.pose.position.x * pixelScale, (int) odom->pose.pose.position.y * pixelScale);
+    pose2d = cv::Point2i((int) (odom->pose.pose.position.x * pixelScale), (int) (odom->pose.pose.position.y * pixelScale));
   } else {
     pose2d = cv::Point2i(pose2pixel(odom->pose.pose, vectorfield.cols, vectorfield.rows, meterPerPixel));
   }
@@ -52,9 +52,10 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
   // Get the vector in the vectorfield at robot position
   cv::Point2f vector(vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[0], vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[1]);
   const float vectorAbs = cv::norm(vector);
-  const double vectorAngle = atan2(vector.x, vector.y);
-  // Get the robot information
-  const double robotAngle = tf::getYaw(odom->pose.pose.orientation);
+  const double vectorAngle = atan2(vector.y, vector.x);
+
+  // Get the robot information (invert the robot angle, because it is given in the camera frame with z-axis pointing down)
+  const double robotAngle = (-1) * tf::getYaw(odom->pose.pose.orientation);
   const float angleDiff = getAngleDiff(robotAngle, vectorAngle);
 
   if (twistMode) {

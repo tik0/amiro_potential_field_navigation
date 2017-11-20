@@ -223,10 +223,10 @@ potentialfield_to_vectorfield(const cv::Mat &potentialField,
           vectorField(potentialField.rows, potentialField.cols, CV_32FC2, cv::Scalar(0.0f));
 
   if (getPerpendicularVectorfield) {
-    cv::Scharr(potentialField, vectorFieldY, ddepth, 1, 0, 1.0, delta, borderType);
+    cv::Scharr(potentialField, vectorFieldY, ddepth, 1, 0, -1.0, delta, borderType);
     cv::Scharr(potentialField, vectorFieldX, ddepth, 0, 1, -1.0, delta, borderType);
   } else {
-    cv::Scharr(potentialField, vectorFieldX, ddepth, 1, 0, 1.0, delta, borderType);
+    cv::Scharr(potentialField, vectorFieldX, ddepth, 1, 0, -1.0, delta, borderType);
     cv::Scharr(potentialField, vectorFieldY, ddepth, 0, 1, 1.0, delta, borderType);
   }
   cv::Mat vectorFieldChannels[2] = {vectorFieldX, vectorFieldY};

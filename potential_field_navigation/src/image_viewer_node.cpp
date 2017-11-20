@@ -30,6 +30,7 @@ boost::mutex mtx_image1, mtx_image2;
 
 static bool imageIsLive1, imageIsLive2;
 static bool image1once, image2once;
+static int image1_rgb2bgr, image2_rgb2bgr;
 
 static string defaultSubTopic1;
 static string defaultSubTopic2;
@@ -221,8 +222,11 @@ void ImageViewGUI::updateImage1() {
   mtx_image1.lock();
   mtx_image1copy.lock();
   image1.copyTo(this->image1copy);
-  if(image1copy.type() == CV_8UC1)
-    cvtColor(this->image1copy, this->image1copy, CV_GRAY2RGB);
+  if (image1copy.type() == CV_8UC1) {
+    cvtColor(this->image1copy, this->image1copy, CV_GRAY2BGR);
+  } else if (image1_rgb2bgr) {
+    cv::cvtColor(this->image1copy, this->image1copy, cv::COLOR_BGR2RGB);
+  }
   mtx_image1.unlock();
   mtx_image1copy.unlock();
   updateImageLabel();
@@ -232,8 +236,11 @@ void ImageViewGUI::updateImage2() {
   mtx_image2.lock();
   mtx_image2copy.lock();
   image2.copyTo(this->image2copy);
-  if(image2copy.type() == CV_8UC1)
-    cvtColor(this->image2copy, this->image2copy, CV_GRAY2RGB);
+  if (image2copy.type() == CV_8UC1) {
+    cvtColor(this->image2copy, this->image2copy, CV_GRAY2BGR);
+  } else if (image2_rgb2bgr) {
+    cv::cvtColor(this->image2copy, this->image2copy, cv::COLOR_BGR2RGB);
+  }
   mtx_image2.unlock();
   mtx_image2copy.unlock();
   updateImageLabel();
@@ -247,6 +254,8 @@ void ImageViewGUI::updateImageLabel() {
     double sum = transparencySlider1->value() + transparencySlider2->value();
     mtx_image1copy.lock();
     mtx_image2copy.lock();
+    if(image1copy.size() != image2copy.size())
+      cv::resize(image2copy, image2copy, image1copy.size());
     cv::addWeighted(image1copy, transparencySlider1->value() / sum, image2copy, transparencySlider2->value() / sum, 0.0, blended);
     mtx_image1copy.unlock();
     mtx_image2copy.unlock();
@@ -317,6 +326,8 @@ int main(int argc, char *argv[]) {
 
   node.param<string>("subcriber_topic_1", defaultSubTopic1, "/image");
   node.param<string>("subcriber_topic_2", defaultSubTopic2, "/genicam_cam1/cam");
+  node.param<int>("image1_rgb2bgr", image1_rgb2bgr, 1);
+  node.param<int>("image2_rgb2bgr", image2_rgb2bgr, 1);
 
   ROS_INFO("[%s] subcriber_topic_1 %s", ros::this_node::getName().c_str(), defaultSubTopic1.c_str());
   ROS_INFO("[%s] subcriber_topic_2 %s", ros::this_node::getName().c_str(), defaultSubTopic2.c_str());
