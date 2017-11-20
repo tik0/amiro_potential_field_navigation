@@ -50,3 +50,11 @@ export CMAKE_PREFIX_PATH=$F:${CMAKE_PREFIX_PATH}
 * Enter the password ```amiropower```
 * navigate to the act tool folder ```cd ros_navigation_stack_sense_act_tools```
 * start the motorcontrol tool: ```./motorControl -i /amiro<Id>/motor/```
+
+### Colorspace interpretation
+* All information is encoded in the HSV color space
+* The angular is encoded in the Hue component
+* The lenght of a vector is encoded in the Value component
+* Saturation is not used for now
+
+![colorspace](colorspace.png)
