@@ -1,0 +1,279 @@
+<?xml version="1.0"?>
+<launch>
+	<param name="use_sim_time" value="false"/>
+	<arg name="rviz" default="true" />
+	<arg name="cam" default="cam3_2"/>
+	<arg name="meter_per_pixel_original" value="0.0023"/>
+	<arg name="image_width_original" value="2560"/>
+	<arg name="image_height_original" value="2048"/>
+	<arg name="pixel_scale" value="0.1"/>
+	<arg name="pixel_mode" value="true"/>
+	<arg name="meter_per_pixel" value="$(eval arg('meter_per_pixel_original') / arg('pixel_scale'))"/>
+	<arg name="image_width" value="$(eval arg('image_width_original') * arg('pixel_scale'))"/>
+	<arg name="image_height" value="$(eval arg('image_height_original') * arg('pixel_scale'))"/>
+	<arg name="tracker_prefix" value="/artoolkit5_cam3_2/cam"/>
+	<arg name="amiro_heuristic_abs_min" value="0.4"/>
+	<arg name="amiro_heuristic_factor" value="0.5"/>
+	<arg name="amiro_minimum_pose_difference_pixel" value="2"/>
+
+
+
+	<!-- Rviz -->
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find potential_field_navigation)/config/config.rviz" output="screen" respawn="true"/>
+
+
+
+	<!-- Image Viewer Node -->
+	<node name="image_viewer_node" pkg="potential_field_navigation" type="image_viewer_node" output="screen" cwd="ROS_HOME">
+		<param name="subcriber_topic_1" value="/genicam_cam3/image_raw"/>
+		<param name="subcriber_topic_2" value="/vectorfield/fused/gridmap/rgb_image"/>
+	</node>
+
+
+
+	<!-- Image Selector Nodes -->
+	<node name="image_selecter_node1" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
+		<param name="image_publisher_topic" value="/image1"/>
+	</node>
+
+	<node name="image_selecter_node2" pkg="potential_field_navigation" type="image_selecter_node" output="screen" cwd="ROS_HOME">
+		<param name="image_publisher_topic" value="/image2"/>
+	</node>
+
+
+
+	<!-- Image to Vectorfield Nodes -->
+	<node name="image1_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+		<param name="image_listener_topic" value="/image1"/>
+		<param name="potentialfield_publisher_topic" value="/potentialfield/image1"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/image1"/>
+		<param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+		<param name="heuristic_abs_min" value="0.8"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+		<param name="heuristic_apply" value="1"/> <?Use heuristic instead of native vectorfield?>
+		<param name="desired_vectorfield_width" value="$(arg image_width)"/>
+		<param name="desired_vectorfield_height" value="$(arg image_height)"/>
+	</node>
+
+	<node name="image2_to_vectorfield_node" pkg="potential_field_navigation" type="image_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+		<param name="image_listener_topic" value="/image2"/>
+		<param name="potentialfield_publisher_topic" value="/potentialfield/image2"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/image2"/>
+		<param name="heuristic_factor" value="1.0"/> <?Maximum vector lengh?>
+		<param name="heuristic_abs_min" value="0.8"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+		<param name="heuristic_apply" value="1"/> <?Use heuristic instead of native vectorfield?>
+		<param name="desired_vectorfield_width" value="$(arg image_width)"/>
+		<param name="desired_vectorfield_height" value="$(arg image_height)"/>
+	</node>
+
+
+
+	<!-- Vectorfield to GridMap -->
+	<node name="vectorfield_to_gridmap_node_image" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="$(arg cam)_image"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/image"/>
+		<param name="gridmap_publisher_topic" value="/vectorfield/image/gridmap"/>
+	</node>
+
+	<node name="vectorfield_to_gridmap_node2" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="$(arg cam)_image"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/amiro2"/>
+		<param name="gridmap_publisher_topic" value="/vectorfield/amiro2/gridmap"/>
+	</node>
+
+	<node name="vectorfield_to_gridmap_node5" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="$(arg cam)_image"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/amiro5"/>
+		<param name="gridmap_publisher_topic" value="/vectorfield/amiro5/gridmap"/>
+	</node>
+
+	<node name="vectorfield_to_gridmap_node6" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="$(arg cam)_image"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/amiro6"/>
+		<param name="gridmap_publisher_topic" value="/vectorfield/amiro6/gridmap"/>
+	</node>
+
+  <node name="vectorfield_to_gridmap_node25" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+    <param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+    <param name="frame_id" value="$(arg cam)_image"/>
+    <param name="vectorfield_listener_topic" value="/vectorfield/25/fused"/>
+    <param name="gridmap_publisher_topic" value="/vectorfield/25/gridmap"/>
+  </node>
+
+
+
+	<!-- Transform -->
+	<node name="tf_world_cam" pkg="tf" type="static_transform_publisher" args="0 0 3.66265 0 0 3.14159 world $(arg cam) 100"/>
+	<node name="tf_world_cam_image" pkg="tf" type="static_transform_publisher" args="0 0 0 1.5708 0 0 world $(arg cam)_image 100"/>
+
+
+
+	<!-- Bridges -->
+	<node name="AMiRo2" pkg="ros_to_rsb_bridge" type="ros_geometry_msgs_twist_to_rst_value_array" output="screen" cwd="ROS_HOME">
+		<param name="ros_listener_topic" value="/amiro2/cmd_vel"/>
+		<param name="rsb_publish_scope" value="/amiro2/motor/5"/>
+		<param name="duration" value="1000000"/>
+	</node>
+
+	<node name="AMiRo5" pkg="ros_to_rsb_bridge" type="ros_geometry_msgs_twist_to_rst_value_array" output="screen" cwd="ROS_HOME">
+		<param name="ros_listener_topic" value="/amiro5/cmd_vel"/>
+		<param name="rsb_publish_scope" value="/amiro5/motor/5"/>
+		<param name="duration" value="1000000"/>
+	</node>
+
+	<node name="AMiRo6" pkg="ros_to_rsb_bridge" type="ros_geometry_msgs_twist_to_rst_value_array" output="screen" cwd="ROS_HOME">
+		<param name="ros_listener_topic" value="/amiro6/cmd_vel"/>
+		<param name="rsb_publish_scope" value="/amiro6/motor/5"/>
+		<param name="duration" value="1000000"/>
+	</node>
+
+
+
+	<!-- Amiro Vectorfield Creator -->
+	<node name="odom2_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="world"/>
+		<!--<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/odom/2"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/2" if="$(arg pixel_mode)"/>
+		<param name="potentialfield_publisher_topic" value="/potentialfield/amiro2"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/amiro2"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="image_width" value="$(arg image_width)"/>
+		<param name="image_height" value="$(arg image_height)"/>
+		<param name="heuristic_abs_min" value="$(arg amiro_heuristic_abs_min)"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+		<param name="heuristic_factor" value="$(arg amiro_heuristic_factor)"/> <?Maximum vector lengh?>
+		<param name="minimum_pose_difference_pixel" value="$(arg amiro_minimum_pose_difference_pixel)"/> <?Only recalculate the map if the robot has moved that much?>
+	</node>
+
+	<node name="odom5_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="world"/>
+		<!--<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/odom/5"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/5" if="$(arg pixel_mode)"/>
+		<param name="potentialfield_publisher_topic" value="/potentialfield/amiro5"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/amiro5"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="image_width" value="$(arg image_width)"/>
+		<param name="image_height" value="$(arg image_height)"/>
+		<param name="heuristic_abs_min" value="$(arg amiro_heuristic_abs_min)"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+		<param name="heuristic_factor" value="$(arg amiro_heuristic_factor)"/> <?Maximum vector lengh?>
+		<param name="minimum_pose_difference_pixel" value="$(arg amiro_minimum_pose_difference_pixel)"/> <?Only recalculate the map if the robot has moved that much?>
+	</node>
+
+	<node name="odom6_to_vectorfield_node" pkg="potential_field_navigation" type="odom_to_vectorfield_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="world"/>
+		<!--<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/odom/6"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/6" if="$(arg pixel_mode)"/>
+		<param name="potentialfield_publisher_topic" value="/potentialfield/amiro6"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/amiro6"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="image_width" value="$(arg image_width)"/>
+		<param name="image_height" value="$(arg image_height)"/>
+		<param name="heuristic_abs_min" value="$(arg amiro_heuristic_abs_min)"/> <?Undefined An arbitrary value which indecates the start of value decay?>
+		<param name="heuristic_factor" value="$(arg amiro_heuristic_factor)"/> <?Maximum vector lengh?>
+		<param name="minimum_pose_difference_pixel" value="$(arg amiro_minimum_pose_difference_pixel)"/> <?Only recalculate the map if the robot has moved that much?>
+	</node>
+
+
+
+	<!-- Vectorfield Merger Images -->
+	<node name="vectorfield_merger__image1_image2" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+		<param name="field1_listener_topic" value="/vectorfield/image1"/>
+		<param name="field2_listener_topic" value="/vectorfield/image2"/>
+		<param name="field_width" value="$(arg image_width)"/>
+		<param name="field_height" value="$(arg image_height)"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/image"/>
+		<param name="normalize" value="0"/>
+	</node>
+
+
+
+	<!-- Vectorfield Merger Amiros -->
+	<node name="vectorfield_merger_2_5" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+		<param name="field1_listener_topic" value="/vectorfield/amiro2"/>
+		<param name="field2_listener_topic" value="/vectorfield/amiro5"/>
+		<param name="field_width" value="$(arg image_width)"/>
+		<param name="field_height" value="$(arg image_height)"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/25/fused"/>
+		<param name="normalize" value="0"/>
+	</node>
+
+	<node name="vectorfield_merger_6_25" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+		<param name="field1_listener_topic" value="/vectorfield/amiro6"/>
+		<param name="field2_listener_topic" value="/vectorfield/25/fused"/>
+		<param name="field_width" value="$(arg image_width)"/>
+		<param name="field_height" value="$(arg image_height)"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/625/fused"/>
+		<param name="normalize" value="0"/>
+	</node>
+
+	<node name="vectorfield_merger_625_image" pkg="potential_field_navigation" type="vectorfield_merger_node" output="screen" cwd="ROS_HOME">
+		<param name="field1_listener_topic" value="/vectorfield/625/fused"/>
+		<param name="field2_listener_topic" value="/vectorfield/image"/>
+		<param name="field_width" value="$(arg image_width)"/>
+		<param name="field_height" value="$(arg image_height)"/>
+		<param name="vectorfield_publisher_topic" value="/vectorfield/625image/fused"/>
+		<param name="normalize" value="0"/>
+	</node>
+
+
+
+	<!-- Vectorfield to GridMap Final -->
+	<node name="vectorfield_to_gridmap_node0" pkg="potential_field_navigation" type="vectorfield_to_gridmap_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="frame_id" value="$(arg cam)_image"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/625image/fused"/>
+		<param name="gridmap_publisher_topic" value="/vectorfield/fused/gridmap"/>
+	</node>
+
+
+
+	<!-- Steering -->
+	<node name="amiro2_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/625image/fused"/>
+		<!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/2" unless="$(arg pixel_mode)"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/2" if="$(arg pixel_mode)" />
+		<param name="twist_publisher_topic" value="/amiro2/cmd_vel"/>
+		<param name="velocityScale_meterPerSecond" value="0.1"/>
+		<param name="angularScale_radPerSecond" value="0.5"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="twist_mode" value="True"/>
+	</node>
+
+	<node name="amiro5_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/625image/fused"/>
+		<!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/5" unless="$(arg pixel_mode)"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/5" if="$(arg pixel_mode)" />
+		<param name="twist_publisher_topic" value="/amiro5/cmd_vel"/>
+		<param name="velocityScale_meterPerSecond" value="0.1"/>
+		<param name="angularScale_radPerSecond" value="0.5"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="twist_mode" value="True"/>
+	</node>
+
+	<node name="amiro6_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
+		<param name="meter_per_pixel" value="$(arg meter_per_pixel)"/>
+		<param name="vectorfield_listener_topic" value="/vectorfield/625image/fused"/>
+		<!--<param name="amiro_odom_listener_topic" value="/artoolkit5_$(arg cam)/cam/odom/6" unless="$(arg pixel_mode)"/>-->
+		<param name="amiro_odom_listener_topic" value="$(arg tracker_prefix)/pixel/6" if="$(arg pixel_mode)" />
+		<param name="twist_publisher_topic" value="/amiro6/cmd_vel"/>
+		<param name="velocityScale_meterPerSecond" value="0.1"/>
+		<param name="angularScale_radPerSecond" value="0.5"/>
+		<param name="pixel_mode" value="$(arg pixel_mode)"/>
+		<param name="pixel_scale" value="$(arg pixel_scale)"/>
+		<param name="twist_mode" value="True"/>
+	</node>
+
+
+</launch>

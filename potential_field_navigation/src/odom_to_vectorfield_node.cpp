@@ -38,7 +38,7 @@ static bool firstRun = true;
 static int minPoseDiff_pixel = 10;
 
 void process(const nav_msgs::OdometryConstPtr &odom) {
-  cv::Mat potentialField(imageHeight, imageWidth, CV_32FC1);
+  cv::Mat potentialField(imageHeight, imageWidth, CV_32FC1, cv::Scalar(0.0f));
   cv::Point2i pose2d;
 //    pose2d = cv::Point2i((int) (odom->pose.pose.position.x / meterPerPixel + imageWidth/2), (int) (odom->pose.pose.position.y / meterPerPixel + imageHeight/2));
   if (pixelMode) {
@@ -83,14 +83,16 @@ void process(const nav_msgs::OdometryConstPtr &odom) {
       float &y = vectorField.at<cv::Vec2f>(idx)[1];
       const float abs = sqrt(x * x + y * y);
       if (abs > heuristic_abs_min) {
-        x = 0.0;
-        y = 0.0;
+        x = 0.0f;
+        y = 0.0f;
       } else {
         x = ((abs / heuristic_abs_min) * heuristic_factor) * (x / abs);
         y = ((abs / heuristic_abs_min) * heuristic_factor) * (y / abs);
       }
     }
   }
+  vectorField.at<cv::Vec2f>(pose2d.y, pose2d.x)[0] = 0.0f;
+  vectorField.at<cv::Vec2f>(pose2d.y, pose2d.x)[1] = 0.0f;
 
   // Send the data
   cv_bridge::CvImage cvImagePot;

@@ -48,9 +48,14 @@ void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) 
     return;
   }
 
+  ROS_DEBUG_STREAM(ros::this_node::getName() << " pose2d.x: " << pose2d.x << " pose2d.y: " << pose2d.y);
+
   // IMPORTANT: We assume the orientation of the robot resides in the world frame
   // Get the vector in the vectorfield at robot position
-  cv::Point2f vector(vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[0], vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[1]);
+  float x = vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[0];
+  float y = vectorfield.at<cv::Vec2f>(pose2d.y, pose2d.x)[1];
+  cv::Point2f vector(x, y);
+  ROS_DEBUG_STREAM(ros::this_node::getName() << " x: " << x << " y: " << y);
   const float vectorAbs = cv::norm(vector);
   const double vectorAngle = atan2(vector.y, vector.x);
 
@@ -80,7 +85,7 @@ void processSynced(const sensor_msgs::ImageConstPtr &image, const nav_msgs::Odom
 
 void processVectorfield(const sensor_msgs::ImageConstPtr &msg) {
   // TODO Normalize vectorfield (?)
-  vectorfield = cv_bridge::toCvCopy(msg, msg->encoding)->image;
+  vectorfield = cv_bridge::toCvCopy(msg/*, msg->encoding*/)->image;
   dataArrived = true;
 }
 
