@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   cv_bridge
+  OpenCV
   image_transport
   )
 
@@ -40,6 +41,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
   include/
   ${QT_USE_FILE}
+  ${OPENCV_INCLUDE_DIR}
 )
 #image_to_vectorfield_node
 add_executable(image_to_vectorfield_node
@@ -65,6 +67,7 @@ target_link_libraries(image_selecter_node
   ${catkin_LIBRARIES}
   Qt5::Widgets
   ${Boost_LIBRARIES}
+  ${OpenCV_LIBRARIES}
   )
 
 #odom_to_vectorfield_node

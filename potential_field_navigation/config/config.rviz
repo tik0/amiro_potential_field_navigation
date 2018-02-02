@@ -116,7 +116,7 @@ Visualization Manager:
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: true
+      Enabled: false
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -130,7 +130,7 @@ Visualization Manager:
       Topic: /vectorfield/amiro2/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: true
+      Value: false
     - Alpha: 0.100000001
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
@@ -179,7 +179,7 @@ Visualization Manager:
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: true
+      Enabled: false
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -193,14 +193,14 @@ Visualization Manager:
       Topic: /vectorfield/amiro5/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: true
+      Value: false
     - Alpha: 0.100000001
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: true
+      Enabled: false
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -214,7 +214,7 @@ Visualization Manager:
       Topic: /vectorfield/amiro6/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: true
+      Value: false
     - Alpha: 0.100000001
       Autocompute Intensity Bounds: true
       Class: grid_map_rviz_plugin/GridMap
@@ -287,7 +287,7 @@ Visualization Manager:
       Color: 200; 200; 200
       Color Layer: color
       Color Transformer: ColorLayer
-      Enabled: false
+      Enabled: true
       Height Layer: elevation
       Height Transformer: Layer
       History Length: 1
@@ -301,7 +301,7 @@ Visualization Manager:
       Topic: /vectorfield/fused/gridmap
       Unreliable: false
       Use Rainbow: true
-      Value: false
+      Value: true
     - Angle Tolerance: 0.100000001
       Class: rviz/Odometry
       Covariance:
@@ -557,7 +557,7 @@ Visualization Manager:
           Scale: 1
           Value: true
         Value: false
-      Enabled: true
+      Enabled: false
       Keep: 1
       Name: Odometry Marker 9
       Position Tolerance: 0.100000001
@@ -573,7 +573,7 @@ Visualization Manager:
         Value: Arrow
       Topic: /artoolkit5_cam3_2/cam/odom/9
       Unreliable: false
-      Value: true
+      Value: false
     - Class: rviz/Image
       Enabled: false
       Image Topic: /potentialfield/amiro9
@@ -611,7 +611,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 6.01404142
+      Distance: 6.28559446
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -626,10 +626,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.989797235
+      Pitch: 1.24479711
       Target Frame: world
       Value: Orbit (rviz)
-      Yaw: 4.33674622
+      Yaw: 3.63673639
     Saved: ~
 Window Geometry:
   Displays:

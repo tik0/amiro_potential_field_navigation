@@ -17,7 +17,8 @@ argslist = [
     """<arg name="tracker_prefix" value="/artoolkit5_cam3_2/cam"/>""",
     """<arg name="amiro_heuristic_abs_min" value="0.4"/>""",
     """<arg name="amiro_heuristic_factor" value="0.5"/>""",
-    """<arg name="amiro_minimum_pose_difference_pixel" value="2"/>"""
+    """<arg name="amiro_minimum_pose_difference_pixel" value="2"/>""",
+    """<arg name="amiro_cmd_vel_frequency" value="10"/>"""
     ]
 
 filename = "generated.launch";
@@ -121,6 +122,7 @@ def writeVectorfieldToKinematicNode(file, id, vectorfieldTopic):
     + tab + tab + '<param name="pixel_mode" value="$(arg pixel_mode)"/>' + el
     + tab + tab + '<param name="pixel_scale" value="$(arg pixel_scale)"/>' + el
     + tab + tab + '<param name="twist_mode" value="True"/>' + el
+    + tab + tab + '<param name="frequency" value="$(arg amiro_cmd_vel_frequency)"/>' + el
     + tab + '</node>' + el)
 
 def writeHeader(file, name):

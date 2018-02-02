@@ -72,11 +72,13 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
 
   loadImageButton1 = new QPushButton(this);
   loadImageButton1->setText("loadImageButton1");
+  loadImageButton1->setDisabled(true);
   QObject::connect(loadImageButton1, &QPushButton::clicked, this, &ImageViewGUI::clickedLoadImageButton1);
 
   radioButton1 = new QRadioButton(this);
   radioButton1->setText("live");
   radioButton1->setChecked(true);
+  radioButton1->setDisabled(true);
   QObject::connect(radioButton1, &QRadioButton::clicked, this, &ImageViewGUI::clickedRadioButton1);
   imageIsLive1 = radioButton1->isChecked();
 
@@ -115,11 +117,13 @@ ImageViewGUI::ImageViewGUI(QWidget *parent) : QWidget(parent), shutdown_required
 
   loadImageButton2 = new QPushButton(this);
   loadImageButton2->setText("loadImageButton2");
+  loadImageButton2->setDisabled(true);
   QObject::connect(loadImageButton2, &QPushButton::clicked, this, &ImageViewGUI::clickedLoadImageButton2);
 
   radioButton2 = new QRadioButton(this);
   radioButton2->setText("live");
   radioButton2->setChecked(true);
+  radioButton2->setDisabled(true);
   QObject::connect(radioButton2, &QRadioButton::clicked, this, &ImageViewGUI::clickedRadioButton2);
   imageIsLive2 = radioButton2->isChecked();
 

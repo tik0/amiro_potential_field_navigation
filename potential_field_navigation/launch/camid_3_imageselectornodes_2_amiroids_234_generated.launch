@@ -14,7 +14,8 @@
 	<arg name="tracker_prefix" value="/artoolkit5_cam3_2/cam"/>
 	<arg name="amiro_heuristic_abs_min" value="0.4"/>
 	<arg name="amiro_heuristic_factor" value="0.5"/>
-	<arg name="amiro_minimum_pose_difference_pixel" value="0"/>
+	<arg name="amiro_minimum_pose_difference_pixel" value="2"/>
+	<arg name="amiro_cmd_vel_frequency" value="10"/>
 
 
 
@@ -243,6 +244,7 @@
 		<param name="pixel_mode" value="$(arg pixel_mode)"/>
 		<param name="pixel_scale" value="$(arg pixel_scale)"/>
 		<param name="twist_mode" value="True"/>
+		<param name="frequency" value="$(arg amiro_cmd_vel_frequency)"/>
 	</node>
 
 	<node name="amiro3_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
@@ -256,6 +258,7 @@
 		<param name="pixel_mode" value="$(arg pixel_mode)"/>
 		<param name="pixel_scale" value="$(arg pixel_scale)"/>
 		<param name="twist_mode" value="True"/>
+		<param name="frequency" value="$(arg amiro_cmd_vel_frequency)"/>
 	</node>
 
 	<node name="amiro4_vectorfield_to_kinematic_node" pkg="potential_field_navigation" type="vectorfield_to_kinematic_node" output="screen" cwd="ROS_HOME">
@@ -269,6 +272,7 @@
 		<param name="pixel_mode" value="$(arg pixel_mode)"/>
 		<param name="pixel_scale" value="$(arg pixel_scale)"/>
 		<param name="twist_mode" value="True"/>
+		<param name="frequency" value="$(arg amiro_cmd_vel_frequency)"/>
 	</node>
 
 

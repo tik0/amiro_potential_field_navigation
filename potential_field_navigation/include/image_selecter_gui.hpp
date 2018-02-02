@@ -10,6 +10,8 @@
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QRadioButton>
+#include <QLineEdit>
+#include <QIntValidator>
 
 #include <boost/thread.hpp>
 
@@ -32,9 +34,14 @@ public:
 
 public:
 
+  void toggleMode();
+  void toggleModeImage();
+  void toggleModeVideo();
   void selectImage();
-
+  void selectVideo();
   void publishImage();
+  void startVideo();
+  void spin();
 
   QImage mat2QImage(const cv::Mat &mat) {
     QImage::Format format;
@@ -51,8 +58,6 @@ public:
     return QImage((const unsigned char *) (mat.data), mat.cols, mat.rows, format);
   }
 
-  void spin();
-
 private:
 
   bool shutdown_required;
@@ -61,8 +66,8 @@ private:
   cv::Mat cv_image;
   QImage qt_image;
 
-  QGroupBox *groupBox1;
-  QHBoxLayout *qhBox1;
+  QGroupBox *groupBoxImage;
+  QHBoxLayout *qhBoxImage;
   QGridLayout *gridLayout1;
   QPushButton *publish_image;
   QPushButton *image_selecter;
@@ -71,6 +76,16 @@ private:
   QCheckBox *checkboxSendAsCurrent;
   QRadioButton *radioButtonRed;
   QRadioButton *radioButtonBlue;
+
+  QCheckBox *checkImageMode;
+  QCheckBox *checkVideoMode;
+
+  QGroupBox *groupBoxVideo;
+  QHBoxLayout *qhBoxVideo;
+  QPushButton *videoSelecter;
+  QPushButton *startVideoButton;
+  QLabel *videoDelayLabel;
+  QLineEdit *videoDelayLineEdit;
 
 };
 

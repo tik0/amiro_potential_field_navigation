@@ -25,9 +25,14 @@ static image_transport::Publisher imagePublisher;
 static int loadAsMono;
 static int monoAsRed;
 static int chargeAsCurrent;
+static bool imageMode;
+static int videoDelay;
+
+static cv::VideoCapture cap;
 
 ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&ImageSelecterGUI::spin, this) {
 
+  // Image Gui Stuff
   image_label = new QLabel(this);
 //  image_label->setText(QString::fromStdString("image label"));
 
@@ -61,25 +66,66 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
   } else {
     checkboxSendAsCurrent->setChecked(false);
   }
+  
+  checkImageMode = new QCheckBox(this);
+  checkImageMode->setChecked(imageMode);
+  QObject::connect(checkImageMode, &QCheckBox::clicked, this, &ImageSelecterGUI::toggleModeImage);
 
-  qhBox1 = new QHBoxLayout;
-  qhBox1->addWidget(image_selecter);
-  qhBox1->addWidget(publish_image);
-  qhBox1->addWidget(checkboxLoadAsGray);
-  qhBox1->addWidget(radioButtonRed);
-  qhBox1->addWidget(radioButtonBlue);
-  qhBox1->addWidget(checkboxSendAsCurrent);
-  groupBox1 = new QGroupBox(this);
-  groupBox1->setTitle("Parameter");
-  groupBox1->setLayout(qhBox1);
-  QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-  groupBox1->setSizePolicy(sizePolicy);
+  // Image QhBox
+  qhBoxImage = new QHBoxLayout;
+  qhBoxImage->addWidget(checkImageMode);
+  qhBoxImage->addWidget(image_selecter);
+  qhBoxImage->addWidget(publish_image);
+  qhBoxImage->addWidget(checkboxLoadAsGray);
+  qhBoxImage->addWidget(radioButtonRed);
+  qhBoxImage->addWidget(radioButtonBlue);
+  qhBoxImage->addWidget(checkboxSendAsCurrent);
+  groupBoxImage = new QGroupBox(this);
+  groupBoxImage->setTitle("Image Parameter");
+  groupBoxImage->setLayout(qhBoxImage);
+  QSizePolicy sizePolicyImage(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+  groupBoxImage->setSizePolicy(sizePolicyImage);
+
+  // Video Gui Stuff
+  checkVideoMode = new QCheckBox(this);
+  checkVideoMode->setChecked(!imageMode);
+  QObject::connect(checkVideoMode, &QCheckBox::clicked, this, &ImageSelecterGUI::toggleModeVideo);
+
+  videoSelecter = new QPushButton("select video", this);
+  QObject::connect(videoSelecter, &QPushButton::clicked, this, &ImageSelecterGUI::selectVideo);
+
+  startVideoButton = new QPushButton("start video", this);
+  QObject::connect(startVideoButton, &QPushButton::clicked, this, &ImageSelecterGUI::startVideo);
+  startVideoButton->setEnabled(false);
+
+//  videoDelayLabel = new QLabel(QString(), this);
+  videoDelayLabel = new QLabel(QString("video delay:"), this);
+
+  videoDelayLineEdit = new QLineEdit(this);
+  videoDelayLineEdit->setValidator(new QIntValidator(1, 100, this));
+  QSizePolicy sizePolicyLineEdit(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+  videoDelayLineEdit->setSizePolicy(sizePolicyLineEdit);
+  videoDelayLineEdit->setText(QString(videoDelay));
+
+  // Video QhBox
+  qhBoxVideo = new QHBoxLayout;
+  qhBoxVideo->addWidget(checkVideoMode);
+  qhBoxVideo->addWidget(videoSelecter);
+  qhBoxVideo->addWidget(startVideoButton);
+  qhBoxVideo->addWidget(videoDelayLabel);
+  qhBoxVideo->addWidget(videoDelayLineEdit);
+  groupBoxVideo = new QGroupBox(this);
+  groupBoxVideo->setTitle("Video Parameter");
+  groupBoxVideo->setLayout(qhBoxVideo);
+  QSizePolicy sizePolicyVideo(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+  groupBoxVideo->setSizePolicy(sizePolicyVideo);
 
   // Total Gui
   this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
   gridLayout1 = new QGridLayout();
-  gridLayout1->addWidget(groupBox1, 0, 0);
-  gridLayout1->addWidget(image_label, 1, 0);
+  gridLayout1->addWidget(groupBoxImage, 0, 0);
+  gridLayout1->addWidget(groupBoxVideo, 1, 0);
+  gridLayout1->addWidget(image_label, 2, 0);
   this->setLayout(gridLayout1);
 
 }
@@ -93,8 +139,17 @@ ImageSelecterGUI::~ImageSelecterGUI() {
   delete publish_image;
   delete image_selecter;
   delete image_label;
-  delete qhBox1;
-  delete groupBox1;
+  delete qhBoxImage;
+  delete groupBoxVideo;
+  delete groupBoxImage;
+  delete checkImageMode;
+  delete checkVideoMode;
+  delete groupBoxVideo;
+  delete qhBoxVideo;
+  delete videoSelecter;
+  delete startVideoButton;
+  delete videoDelayLabel;
+  delete videoDelayLineEdit;
 
   shutdown_required = true;
   thread.join();
@@ -109,6 +164,54 @@ void ImageSelecterGUI::spin() {
   ROS_INFO("[%s] Shutdown this node.", ros::this_node::getName().c_str());
   ros::shutdown();
   QApplication::quit();
+}
+
+void ImageSelecterGUI::toggleModeImage() {
+  imageMode = true;
+  toggleMode();
+}
+
+void ImageSelecterGUI::toggleModeVideo() {
+  imageMode = false;
+  toggleMode();
+}
+
+void ImageSelecterGUI::toggleMode() {
+  checkImageMode->setChecked(imageMode);
+  checkVideoMode->setChecked(!imageMode);
+
+  groupBoxImage->setEnabled(imageMode);
+  groupBoxVideo->setEnabled(!imageMode);
+  ROS_INFO("image mode %d", imageMode);
+  cout << "checkImageMode->isChecked():" << checkImageMode->isChecked() << endl;
+  cout << "checkVideoMode->isChecked():" << checkVideoMode->isChecked() << endl;
+}
+
+void ImageSelecterGUI::selectVideo() {
+  QString fileName = QFileDialog::getOpenFileName(this, QString::fromStdString("Open video"), QString::fromStdString("../patter/"), QString::fromStdString("Video Files (*.avi *.mp4)"));
+  cap.open(fileName.toStdString());
+  cap.set(CV_CAP_PROP_XI_FRAMERATE, 1);
+  startVideoButton->setEnabled(true);
+}
+
+void ImageSelecterGUI::startVideo() {
+  while(cap.read(cv_image)) {
+    qt_image = mat2QImage(cv_image);
+    if(qt_image.size().width() > 1200) {
+      image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToWidth(1200)));
+    } else if(qt_image.size().height() > 1000) {
+      image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToHeight(1000)));
+    } else {
+      image_label->setPixmap(QPixmap::fromImage(qt_image));
+    }
+    image_label->show();
+    cout << "image_label->show()" << endl;
+
+    publishImage();
+    sleep(videoDelay);
+  }
+  startVideoButton->setEnabled(false);
+
 }
 
 void ImageSelecterGUI::selectImage() {
@@ -185,9 +288,11 @@ int main(int argc, char *argv[]) {
   string rosPublisherTopic;
 
   node.param<string>("image_publisher_topic", rosPublisherTopic, "/image");
-  node.param<int>("load_as_mono", loadAsMono, 1);
+  node.param<int>("load_as_mono", loadAsMono, 0);
   node.param<int>("mono_as_red", monoAsRed, 0);
   node.param<int>("charge_as_current", chargeAsCurrent, 0);
+  node.param<bool>("image_mode", imageMode, true);
+  node.param<int>("video_delay", videoDelay, 7);
   ROS_INFO("[%s] image_publisher_topic: %s", ros::this_node::getName().c_str(), rosPublisherTopic.c_str());
 
   image_transport::ImageTransport imageTransport(node);

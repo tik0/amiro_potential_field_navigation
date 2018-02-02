@@ -35,6 +35,8 @@ static bool pixelMode;
 static bool twistMode;
 static double pixelScale;
 
+static int frequency;
+
 void process(const cv::Mat &vectorfield, const nav_msgs::OdometryConstPtr odom) {
 
   cv::Point2i pose2d;
@@ -120,6 +122,7 @@ int main(int argc, char *argv[]) {
   node.param<bool>("pixel_mode", pixelMode, false);
   node.param<bool>("twist_mode", twistMode, false);
   node.param<double>("pixel_scale", pixelScale, 1.0);
+  node.param<int>("frequency", frequency, 10);
   ROS_INFO("[%s] vectorfield_listener_topic: %s", ros::this_node::getName().c_str(), vectorfield_listener_topic.c_str());
   ROS_INFO("[%s] amiro_odom_listener_topic: %s", ros::this_node::getName().c_str(), amiroOdomListenerTopic.c_str());
   ROS_INFO("[%s] twist_publisher_topic: %s", ros::this_node::getName().c_str(), twistPublisherTopic.c_str());
@@ -128,6 +131,7 @@ int main(int argc, char *argv[]) {
   ROS_INFO("[%s] pixel_mode: %i", ros::this_node::getName().c_str(), pixelMode);
   ROS_INFO("[%s] twist_mode: %i", ros::this_node::getName().c_str(), twistMode);
   ROS_INFO("[%s] pixel_scale: %f", ros::this_node::getName().c_str(), pixelScale);
+  ROS_INFO("[%s] frequency: %f", ros::this_node::getName().c_str(), frequency);
 
   if (twistMode) {
     // The twist publisher
@@ -154,6 +158,11 @@ int main(int argc, char *argv[]) {
     odom_sub = node.subscribe(amiroOdomListenerTopic, 1, &processOdom);
   }
 
-  ros::spin();
+  ros::Rate rate(frequency);
+  while(ros::ok()) {
+    ros::spinOnce();
+    rate.sleep();
+  }
+
   return 0;
 }
