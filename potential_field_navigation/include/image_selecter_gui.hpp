@@ -1,3 +1,7 @@
+#ifndef _IMAGE_SELECTER_GUI_HPP_
+#define _IMAGE_SELECTER_GUI_HPP_
+
+
 // Qt5 Widgets
 #include <QWidget>
 #include <QMainWindow>
@@ -14,14 +18,19 @@
 #include <QIntValidator>
 
 #include <boost/thread.hpp>
+#include <atomic>
 
-/*
- * ROS QT Implementation after this tutorial:
- *
- */
+// ROS
+#include <ros/ros.h>
+#include <sensor_msgs/Image.h>
+// ROS - OpenCV_ Bridge
+#include <cv_bridge/cv_bridge.h>
+#include <image_transport/image_transport.h>
 
-#ifndef _IMAGE_SELECTER_GUI_HPP_
-#define _IMAGE_SELECTER_GUI_HPP_
+// OpenCV
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 class ImageSelecterGUI : public QWidget {
 
@@ -33,15 +42,13 @@ public:
   ~ImageSelecterGUI();
 
 public:
-
-  void toggleMode();
-  void toggleModeImage();
-  void toggleModeVideo();
   void selectImage();
+  void showImage();
   void selectVideo();
   void publishImage();
-  void startVideo();
+  void publishVideo();
   void spin();
+  void toggleMode();
 
   QImage mat2QImage(const cv::Mat &mat) {
     QImage::Format format;
@@ -66,26 +73,30 @@ private:
   cv::Mat cv_image;
   QImage qt_image;
 
+  QGroupBox *groupBoxCommon;
+  QHBoxLayout *qhBoxCommon;
+  QCheckBox *checkboxSendAsCurrent;
+  QRadioButton *radioButtonImage;
+  QRadioButton *radioButtonVideo;
+
   QGroupBox *groupBoxImage;
   QHBoxLayout *qhBoxImage;
   QGridLayout *gridLayout1;
-  QPushButton *publish_image;
-  QPushButton *image_selecter;
-  QLabel *image_label;
+  QPushButton *publishImageButton;
+  QPushButton *imageSelectButton;
+  QLabel *imageLabel;
   QCheckBox *checkboxLoadAsGray;
-  QCheckBox *checkboxSendAsCurrent;
   QRadioButton *radioButtonRed;
   QRadioButton *radioButtonBlue;
-
-  QCheckBox *checkImageMode;
-  QCheckBox *checkVideoMode;
-
+  
   QGroupBox *groupBoxVideo;
   QHBoxLayout *qhBoxVideo;
-  QPushButton *videoSelecter;
-  QPushButton *startVideoButton;
+  QPushButton *videoSelectButton;
+  QPushButton *publishVideoButton;
   QLabel *videoDelayLabel;
   QLineEdit *videoDelayLineEdit;
+  
+  std::atomic<bool> doPublishVideo;
 
 };
 

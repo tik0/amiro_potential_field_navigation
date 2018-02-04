@@ -2,20 +2,8 @@
 // Name        : image_selecter_node.cpp
 // Author      : Daniel Rudolph <drudolph@techfak.uni-bielefeld.de>
 //               Timo Korthals <tkorthals@cit-ec.uni-bielefeld.de>
-// Description : Creates a GUI to select a image for publishing it.
+// Description : Creates a GUI to select an image or video for publishing
 // ============================================================================
-
-// ROS
-#include <ros/ros.h>
-#include <sensor_msgs/Image.h>
-// ROS - OpenCV_ Bridge
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
-
-// OpenCV
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #include "image_selecter_gui.hpp"
 
@@ -32,16 +20,16 @@ static cv::VideoCapture cap;
 
 ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_required(false), thread(&ImageSelecterGUI::spin, this) {
 
+  doPublishVideo = false;
   // Image Gui Stuff
-  image_label = new QLabel(this);
-//  image_label->setText(QString::fromStdString("image label"));
+  imageLabel = new QLabel(this);
 
-  image_selecter = new QPushButton("select image", this);
-  QObject::connect(image_selecter, &QPushButton::clicked, this, &ImageSelecterGUI::selectImage);
+  imageSelectButton = new QPushButton("select image", this);
+  QObject::connect(imageSelectButton, &QPushButton::clicked, this, &ImageSelecterGUI::selectImage);
 
-  publish_image = new QPushButton("publish image", this);
-  QObject::connect(publish_image, &QPushButton::clicked, this, &ImageSelecterGUI::publishImage);
-  publish_image->setEnabled(false);
+  publishImageButton = new QPushButton("publish image", this);
+  QObject::connect(publishImageButton, &QPushButton::clicked, this, &ImageSelecterGUI::publishImage);
+  publishImageButton->setEnabled(false);
 
   checkboxLoadAsGray = new QCheckBox("image as mono", this);
   if (loadAsMono) {
@@ -59,6 +47,11 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
     radioButtonBlue->setChecked(true);
     radioButtonRed->setChecked(false);
   }
+  
+  radioButtonImage = new QRadioButton("Image");
+  radioButtonVideo = new QRadioButton("Video");
+  radioButtonImage->setChecked(true);
+  radioButtonVideo->setChecked(false);
 
   checkboxSendAsCurrent = new QCheckBox("as current", this);
   if (chargeAsCurrent) {
@@ -66,98 +59,117 @@ ImageSelecterGUI::ImageSelecterGUI(QWidget *parent) : QWidget(parent), shutdown_
   } else {
     checkboxSendAsCurrent->setChecked(false);
   }
-  
-  checkImageMode = new QCheckBox(this);
-  checkImageMode->setChecked(imageMode);
-  QObject::connect(checkImageMode, &QCheckBox::clicked, this, &ImageSelecterGUI::toggleModeImage);
 
+  QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+
+  // Common QhBox
+  qhBoxCommon = new QHBoxLayout;
+  qhBoxCommon->addWidget(checkboxSendAsCurrent);
+  qhBoxCommon->addWidget(radioButtonImage);
+  qhBoxCommon->addWidget(radioButtonVideo);
+  groupBoxCommon = new QGroupBox(this);
+  groupBoxCommon->setTitle("Common Parameters");
+  groupBoxCommon->setLayout(qhBoxCommon);
+  groupBoxCommon->setSizePolicy(sizePolicy);
+  QObject::connect(radioButtonImage, &QRadioButton::clicked, this, &ImageSelecterGUI::toggleMode);
+  QObject::connect(radioButtonVideo, &QRadioButton::clicked, this, &ImageSelecterGUI::toggleMode);
+  
   // Image QhBox
   qhBoxImage = new QHBoxLayout;
-  qhBoxImage->addWidget(checkImageMode);
-  qhBoxImage->addWidget(image_selecter);
-  qhBoxImage->addWidget(publish_image);
+  qhBoxImage->addWidget(imageSelectButton);
+  qhBoxImage->addWidget(publishImageButton);
   qhBoxImage->addWidget(checkboxLoadAsGray);
   qhBoxImage->addWidget(radioButtonRed);
   qhBoxImage->addWidget(radioButtonBlue);
-  qhBoxImage->addWidget(checkboxSendAsCurrent);
   groupBoxImage = new QGroupBox(this);
-  groupBoxImage->setTitle("Image Parameter");
+  groupBoxImage->setTitle("Image Parameters");
   groupBoxImage->setLayout(qhBoxImage);
-  QSizePolicy sizePolicyImage(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-  groupBoxImage->setSizePolicy(sizePolicyImage);
+  groupBoxImage->setSizePolicy(sizePolicy);
 
   // Video Gui Stuff
-  checkVideoMode = new QCheckBox(this);
-  checkVideoMode->setChecked(!imageMode);
-  QObject::connect(checkVideoMode, &QCheckBox::clicked, this, &ImageSelecterGUI::toggleModeVideo);
+  videoSelectButton = new QPushButton("select video", this);
+  QObject::connect(videoSelectButton, &QPushButton::clicked, this, &ImageSelecterGUI::selectVideo);
 
-  videoSelecter = new QPushButton("select video", this);
-  QObject::connect(videoSelecter, &QPushButton::clicked, this, &ImageSelecterGUI::selectVideo);
+  publishVideoButton = new QPushButton("start video", this);
+  QObject::connect(publishVideoButton, &QPushButton::clicked, this, &ImageSelecterGUI::publishVideo);
+  publishVideoButton->setEnabled(false);
 
-  startVideoButton = new QPushButton("start video", this);
-  QObject::connect(startVideoButton, &QPushButton::clicked, this, &ImageSelecterGUI::startVideo);
-  startVideoButton->setEnabled(false);
-
-//  videoDelayLabel = new QLabel(QString(), this);
-  videoDelayLabel = new QLabel(QString("video delay:"), this);
+  videoDelayLabel = new QLabel(QString("Seconds per Frame:"), this);
 
   videoDelayLineEdit = new QLineEdit(this);
   videoDelayLineEdit->setValidator(new QIntValidator(1, 100, this));
   QSizePolicy sizePolicyLineEdit(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-  videoDelayLineEdit->setSizePolicy(sizePolicyLineEdit);
-  videoDelayLineEdit->setText(QString(videoDelay));
+  videoDelayLineEdit->setSizePolicy(sizePolicy);
+  videoDelayLineEdit->setText(QString::number(videoDelay));
 
   // Video QhBox
   qhBoxVideo = new QHBoxLayout;
-  qhBoxVideo->addWidget(checkVideoMode);
-  qhBoxVideo->addWidget(videoSelecter);
-  qhBoxVideo->addWidget(startVideoButton);
+  qhBoxVideo->addWidget(videoSelectButton);
+  qhBoxVideo->addWidget(publishVideoButton);
   qhBoxVideo->addWidget(videoDelayLabel);
   qhBoxVideo->addWidget(videoDelayLineEdit);
   groupBoxVideo = new QGroupBox(this);
-  groupBoxVideo->setTitle("Video Parameter");
+  groupBoxVideo->setTitle("Video Parameters");
   groupBoxVideo->setLayout(qhBoxVideo);
-  QSizePolicy sizePolicyVideo(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-  groupBoxVideo->setSizePolicy(sizePolicyVideo);
+  groupBoxVideo->setSizePolicy(sizePolicy);
 
   // Total Gui
   this->setWindowTitle(QString::fromStdString(ros::this_node::getName()));
   gridLayout1 = new QGridLayout();
-  gridLayout1->addWidget(groupBoxImage, 0, 0);
-  gridLayout1->addWidget(groupBoxVideo, 1, 0);
-  gridLayout1->addWidget(image_label, 2, 0);
+  gridLayout1->addWidget(groupBoxCommon, 0, 0);
+  gridLayout1->addWidget(groupBoxImage, 1, 0);
+  gridLayout1->addWidget(groupBoxVideo, 2, 0);
+  gridLayout1->addWidget(imageLabel, 3, 0);
   this->setLayout(gridLayout1);
+  groupBoxImage->setEnabled(true);
+  groupBoxVideo->setEnabled(false);
 
 }
 
 ImageSelecterGUI::~ImageSelecterGUI() {
-//  delete label;
   delete checkboxSendAsCurrent;
   delete checkboxLoadAsGray;
   delete radioButtonBlue;
   delete radioButtonRed;
-  delete publish_image;
-  delete image_selecter;
-  delete image_label;
+  delete publishImageButton;
+  delete imageSelectButton;
+  delete imageLabel;
   delete qhBoxImage;
   delete groupBoxVideo;
   delete groupBoxImage;
-  delete checkImageMode;
-  delete checkVideoMode;
   delete groupBoxVideo;
   delete qhBoxVideo;
-  delete videoSelecter;
-  delete startVideoButton;
+  delete videoSelectButton;
+  delete publishVideoButton;
   delete videoDelayLabel;
   delete videoDelayLineEdit;
+  delete radioButtonImage;
+  delete radioButtonVideo;
+  delete qhBoxCommon;
+  delete groupBoxCommon;
 
   shutdown_required = true;
   thread.join();
 }
 
 void ImageSelecterGUI::spin() {
+  sleep(3);
   ros::Rate loop(10);
   while (ros::ok()) {
+    if (doPublishVideo) {
+        if (cap.read(cv_image)) {
+            showImage();
+            publishImage();
+        } else {
+            doPublishVideo = false;
+        }
+        loop = ros::Rate(1/float(videoDelayLineEdit->text().toInt()));
+    } else {
+        if (videoSelectButton) {
+            videoSelectButton->setEnabled(true);
+        }
+        ros::Rate loop(10); // Reset the rate
+    }
     ros::spinOnce();
     loop.sleep();
   }
@@ -166,52 +178,29 @@ void ImageSelecterGUI::spin() {
   QApplication::quit();
 }
 
-void ImageSelecterGUI::toggleModeImage() {
-  imageMode = true;
-  toggleMode();
-}
-
-void ImageSelecterGUI::toggleModeVideo() {
-  imageMode = false;
-  toggleMode();
-}
-
 void ImageSelecterGUI::toggleMode() {
-  checkImageMode->setChecked(imageMode);
-  checkVideoMode->setChecked(!imageMode);
-
-  groupBoxImage->setEnabled(imageMode);
-  groupBoxVideo->setEnabled(!imageMode);
-  ROS_INFO("image mode %d", imageMode);
-  cout << "checkImageMode->isChecked():" << checkImageMode->isChecked() << endl;
-  cout << "checkVideoMode->isChecked():" << checkVideoMode->isChecked() << endl;
+    if (groupBoxImage != NULL && groupBoxVideo != NULL) {
+        if (radioButtonImage->isChecked()) {
+            groupBoxImage->setEnabled(true);
+            groupBoxVideo->setEnabled(false);
+        } else {
+            groupBoxImage->setEnabled(false);
+            groupBoxVideo->setEnabled(true);
+        }
+    }
 }
 
 void ImageSelecterGUI::selectVideo() {
   QString fileName = QFileDialog::getOpenFileName(this, QString::fromStdString("Open video"), QString::fromStdString("../patter/"), QString::fromStdString("Video Files (*.avi *.mp4)"));
   cap.open(fileName.toStdString());
   cap.set(CV_CAP_PROP_XI_FRAMERATE, 1);
-  startVideoButton->setEnabled(true);
+  publishVideoButton->setEnabled(true);
 }
 
-void ImageSelecterGUI::startVideo() {
-  while(cap.read(cv_image)) {
-    qt_image = mat2QImage(cv_image);
-    if(qt_image.size().width() > 1200) {
-      image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToWidth(1200)));
-    } else if(qt_image.size().height() > 1000) {
-      image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToHeight(1000)));
-    } else {
-      image_label->setPixmap(QPixmap::fromImage(qt_image));
-    }
-    image_label->show();
-    cout << "image_label->show()" << endl;
-
-    publishImage();
-    sleep(videoDelay);
-  }
-  startVideoButton->setEnabled(false);
-
+void ImageSelecterGUI::publishVideo() {
+  doPublishVideo = true;
+  videoSelectButton->setEnabled(false);
+  publishVideoButton->setEnabled(false);
 }
 
 void ImageSelecterGUI::selectImage() {
@@ -247,21 +236,23 @@ void ImageSelecterGUI::selectImage() {
     return;
   }
 
+  showImage();
+  publishImageButton->setEnabled(true);
+}
+
+void ImageSelecterGUI::showImage() {
   // Display the image
   cv::Mat rgb;
   cv::cvtColor(cv_image, rgb, CV_BGR2RGB);
   qt_image = mat2QImage(rgb);
-
-
   if(qt_image.size().width() > 1200) {
-    image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToWidth(1200)));
+    imageLabel->setPixmap(QPixmap::fromImage(qt_image.scaledToWidth(1200)));
   } else if(qt_image.size().height() > 1000) {
-    image_label->setPixmap(QPixmap::fromImage(qt_image.scaledToHeight(1000)));
+    imageLabel->setPixmap(QPixmap::fromImage(qt_image.scaledToHeight(1000)));
   } else {
-    image_label->setPixmap(QPixmap::fromImage(qt_image));
+    imageLabel->setPixmap(QPixmap::fromImage(qt_image));
   }
-  image_label->show();
-  publish_image->setEnabled(true);
+  imageLabel->show();    
 }
 
 void ImageSelecterGUI::publishImage() {
