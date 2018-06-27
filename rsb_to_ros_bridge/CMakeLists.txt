@@ -16,9 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(PkgConfig)
-find_package(RSB 0.15 REQUIRED)
-find_package(RSC 0.15 REQUIRED)
-find_package(RST 0.15 REQUIRED COMPONENTS sandbox)
+find_package(RSB REQUIRED)
+find_package(RSC REQUIRED)
+find_package(RST REQUIRED COMPONENTS sandbox)
 find_package(OpenCV 3.0 REQUIRED)
 
 catkin_package(
