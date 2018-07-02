@@ -165,7 +165,7 @@ if __name__ == "__main__":
     """<arg name="meter_per_pixel" value="$(eval arg('meter_per_pixel_original') / arg('pixel_scale'))"/>""",
     """<arg name="image_width" value="$(eval arg('image_width_original') * arg('pixel_scale'))"/>""",
     """<arg name="image_height" value="$(eval arg('image_height_original') * arg('pixel_scale'))"/>""",
-    """<arg name="tracker_prefix" value="/artoolkit5_cam3_2/cam"/>""",
+    """<arg name="tracker_prefix" value="/artoolkit5_cam""" + str(camid) + """_2/cam"/>""",
     """<arg name="amiro_heuristic_abs_min" value="0.4"/>""",
     """<arg name="amiro_heuristic_factor" value="0.5"/>""",
     """<arg name="amiro_minimum_pose_difference_pixel" value="2"/>""",
